@@ -15,6 +15,9 @@
     --ink-soft: #6b6358;
     --ink-faint: #9a9080;
     --accent: #b8543b;
+    --spotlight-bg: #f0e6d2;
+    --spotlight-border: #c9973a;
+    --spotlight-glow: 0 4px 18px rgba(201, 151, 58, 0.18);
     --done: #c8beac;
     --dot-color: rgba(0,0,0,0.018);
     --zone-bg: rgba(0,0,0,0.05);
@@ -23,6 +26,9 @@
     --footer-kbd: rgba(255,255,255,0.15);
     --theme-btn-bg: rgba(0,0,0,0.05);
     --theme-btn-hover: rgba(0,0,0,0.1);
+    --legal-pad: #fef3c7;
+    --legal-rule: #d4c96a;
+    --legal-margin: #f9a8a8;
   }
 
   html[data-theme="dark"] {
@@ -33,6 +39,9 @@
     --ink-soft: #a89e90;
     --ink-faint: #6b6158;
     --accent: #d4705a;
+    --spotlight-bg: #2a2418;
+    --spotlight-border: #b88c3e;
+    --spotlight-glow: 0 4px 18px rgba(184, 140, 62, 0.22);
     --done: #4a4540;
     --dot-color: rgba(255,255,255,0.025);
     --zone-bg: rgba(255,255,255,0.07);
@@ -41,6 +50,9 @@
     --footer-kbd: rgba(255,255,255,0.12);
     --theme-btn-bg: rgba(255,255,255,0.07);
     --theme-btn-hover: rgba(255,255,255,0.12);
+    --legal-pad: #3a2f15;
+    --legal-rule: #6b5a2a;
+    --legal-margin: #6b3a3a;
   }
 
   html, body { margin: 0; padding: 0; }
@@ -56,14 +68,39 @@
     transition: background-color 0.25s, color 0.25s;
   }
 
-  .app { max-width: 680px; margin: 0 auto; padding: 40px 28px 140px; }
+  /* Ripped legal-pad accent on the right edge — nods to the-board's design.
+     Subtle, fixed, decorative only. Hidden on small screens. */
+  .legal-pad-accent {
+    position: fixed;
+    right: -2px;
+    top: 0;
+    height: 100vh;
+    width: 90px;
+    pointer-events: none;
+    opacity: 0.55;
+    z-index: 0;
+    transform: rotate(1.5deg);
+    transform-origin: top right;
+  }
+  html[data-theme="dark"] .legal-pad-accent { opacity: 0.32; }
+
+  .app {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 40px 28px 140px;
+    position: relative;
+    z-index: 1;
+  }
 
   header {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    margin-bottom: 28px;
+    margin-bottom: 24px;
+    gap: 12px;
   }
+
+  .header-left { display: flex; align-items: baseline; gap: 14px; }
 
   h1 {
     font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
@@ -72,6 +109,13 @@
     margin: 0;
     letter-spacing: -0.5px;
     color: var(--ink);
+  }
+
+  .date-stamp {
+    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--ink-faint);
   }
 
   .zone-switch {
@@ -105,8 +149,110 @@
 
   .zone-switch .hint { color: var(--ink-faint); font-size: 11px; }
 
+  /* ──────────────────── Spotlight ──────────────────── */
+  .spotlight {
+    background: var(--spotlight-bg);
+    border: 1px solid var(--spotlight-border);
+    border-left: 3px solid var(--spotlight-border);
+    border-radius: 12px;
+    padding: 18px 20px 16px;
+    margin-bottom: 28px;
+    box-shadow: var(--spotlight-glow);
+    transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
+  }
+  .spotlight.is-empty {
+    border-style: dashed;
+    border-left-style: dashed;
+    box-shadow: none;
+  }
+  .spotlight-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .spotlight-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
+  .spotlight-remove {
+    background: none;
+    border: 0;
+    color: var(--ink-faint);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 2px 4px;
+  }
+  .spotlight-remove:hover { color: var(--ink-soft); }
+  .spotlight-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .spotlight-check {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    margin-top: 4px;
+    border: 2px solid var(--spotlight-border);
+    border-radius: 50%;
+    cursor: pointer;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    padding: 0;
+  }
+  .spotlight-check:hover { transform: scale(1.05); }
+  .spotlight.is-done .spotlight-check {
+    background: var(--spotlight-border);
+  }
+  .spotlight.is-done .spotlight-check::after {
+    content: "✓";
+    color: var(--paper);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .spotlight-input {
+    flex: 1;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+    font-size: 19px;
+    color: var(--ink);
+    line-height: 1.45;
+    resize: none;
+    padding: 2px 0;
+    min-height: 28px;
+    font-family: inherit;
+  }
+  .spotlight-input::placeholder {
+    color: var(--ink-faint);
+    font-style: italic;
+  }
+  .spotlight.is-done .spotlight-input {
+    color: var(--done);
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+  }
+  /* Subtle flourish when spotlight is completed */
+  @keyframes spotlightDone {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+  .spotlight.just-done { animation: spotlightDone 0.5s ease-out; }
+
+  /* ──────────────────── Capture ──────────────────── */
   .capture {
-    margin-bottom: 24px;
+    margin-bottom: 18px;
     padding-bottom: 12px;
     border-bottom: 1px dashed var(--line);
     position: relative;
@@ -134,6 +280,7 @@
 
   .capture input::placeholder { color: var(--ink-faint); }
 
+  /* ──────────────────── List items ──────────────────── */
   .list { display: flex; flex-direction: column; }
 
   .item {
@@ -145,6 +292,7 @@
     cursor: text;
     transition: background 0.12s;
     border-bottom: 1px solid transparent;
+    position: relative;
   }
 
   .item:hover { background: var(--zone-bg); }
@@ -232,10 +380,28 @@
   .actions button:hover { color: var(--ink-soft); }
   .actions .ts { margin-left: auto; font-size: 11px; }
 
+  /* Promote-to-spotlight button — appears on hover */
+  .item .promote {
+    flex-shrink: 0;
+    background: none;
+    border: 0;
+    color: var(--ink-faint);
+    cursor: pointer;
+    padding: 4px 6px;
+    margin-top: 2px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.15s, color 0.15s;
+    font-size: 14px;
+  }
+  .item:hover .promote { opacity: 1; }
+  .item .promote:hover { color: var(--accent); }
+  .item.done .promote { display: none; }
+
   .empty {
     text-align: center;
     color: var(--ink-faint);
-    padding: 80px 20px;
+    padding: 60px 20px;
     font-style: italic;
     font-size: 15px;
   }
@@ -247,10 +413,38 @@
     color: var(--ink-faint);
     margin: 24px 4px 8px;
     font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
   .section-label:first-child { margin-top: 8px; }
+  .section-label .count {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-faint);
+    border-radius: 10px;
+    padding: 0 8px;
+    font-size: 10px;
+    line-height: 18px;
+    min-width: 22px;
+    text-align: center;
+  }
+  .section-label .clear-done {
+    margin-left: auto;
+    background: none;
+    border: 0;
+    color: var(--ink-faint);
+    cursor: pointer;
+    font-size: 11px;
+    text-decoration: underline;
+    text-transform: none;
+    letter-spacing: 0;
+    font-family: inherit;
+  }
+  .section-label .clear-done:hover { color: var(--ink-soft); }
 
-  .theme-toggle {
+  /* ──────────────────── Header controls ──────────────────── */
+  .theme-toggle, .icon-btn {
     background: var(--theme-btn-bg);
     border: 0;
     width: 34px;
@@ -264,11 +458,11 @@
     transition: background 0.15s, color 0.15s, transform 0.2s;
     flex-shrink: 0;
   }
-  .theme-toggle:hover {
+  .theme-toggle:hover, .icon-btn:hover {
     background: var(--theme-btn-hover);
     transform: scale(1.08);
   }
-  .theme-toggle svg { display: block; }
+  .theme-toggle svg, .icon-btn svg { display: block; }
   .theme-toggle .icon-sun { display: none; }
   .theme-toggle .icon-moon { display: block; }
   html[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
@@ -277,9 +471,10 @@
   .header-right {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
   }
 
+  /* ──────────────────── Footer + toast ──────────────────── */
   .footer-hints {
     position: fixed;
     bottom: 20px;
@@ -294,6 +489,7 @@
     gap: 18px;
     backdrop-filter: blur(8px);
     transition: background 0.25s, color 0.25s;
+    z-index: 5;
   }
   .footer-hints kbd {
     background: var(--footer-kbd);
@@ -319,6 +515,7 @@
     display: flex;
     gap: 12px;
     align-items: center;
+    z-index: 6;
   }
   .toast.show { opacity: 1; pointer-events: auto; }
   .toast button {
@@ -332,24 +529,82 @@
     .footer-hints { display: none; }
     .app { padding: 24px 18px 80px; }
     h1 { font-size: 26px; }
+    .legal-pad-accent { display: none; }
+    .header-left { flex-direction: column; gap: 4px; align-items: flex-start; }
+    .date-stamp { font-size: 12px; }
   }
 </style>
 </head>
 <body>
+
+<!-- Decorative ripped legal-pad accent on the right edge (from the-board) -->
+<svg class="legal-pad-accent" viewBox="0 0 90 1000" preserveAspectRatio="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+  <path d="M 28,0 L 90,0 L 90,1000 L 24,1000
+           C 27,982 20,971 31,958 C 39,948 14,937 26,922
+           C 35,910 18,897 30,883 C 40,871 12,860 25,845
+           C 34,833 16,820 29,807 C 38,796 13,783 27,768
+           C 37,756 15,743 28,729 C 39,717 17,704 31,690
+           C 41,678 14,665 26,650 C 36,637 13,624 28,610
+           C 39,598 16,585 30,571 C 41,559 15,546 27,531
+           C 37,519 12,506 26,492 C 38,480 16,467 29,452
+           C 40,440 14,427 27,413 C 38,401 13,388 28,374
+           C 39,362 17,349 31,335 C 42,323 15,310 29,296
+           C 40,284 14,271 27,257 C 38,245 12,232 26,218
+           C 37,206 15,193 30,179 C 41,167 16,154 28,140
+           C 39,128 13,115 27,101 C 38,89 14,76 29,62
+           C 40,50 17,37 31,23 C 36,14 26,6 28,0 Z"
+        fill="var(--legal-pad)"/>
+  <g stroke="var(--legal-rule)" stroke-width="1" opacity="0.35">
+    <line x1="34" y1="40" x2="88" y2="40"/>
+    <line x1="34" y1="80" x2="88" y2="80"/>
+    <line x1="34" y1="120" x2="88" y2="120"/>
+    <line x1="34" y1="160" x2="88" y2="160"/>
+    <line x1="34" y1="200" x2="88" y2="200"/>
+    <line x1="34" y1="240" x2="88" y2="240"/>
+    <line x1="34" y1="280" x2="88" y2="280"/>
+    <line x1="34" y1="320" x2="88" y2="320"/>
+    <line x1="34" y1="360" x2="88" y2="360"/>
+    <line x1="34" y1="400" x2="88" y2="400"/>
+    <line x1="34" y1="440" x2="88" y2="440"/>
+    <line x1="34" y1="480" x2="88" y2="480"/>
+    <line x1="34" y1="520" x2="88" y2="520"/>
+    <line x1="34" y1="560" x2="88" y2="560"/>
+    <line x1="34" y1="600" x2="88" y2="600"/>
+    <line x1="34" y1="640" x2="88" y2="640"/>
+    <line x1="34" y1="680" x2="88" y2="680"/>
+    <line x1="34" y1="720" x2="88" y2="720"/>
+    <line x1="34" y1="760" x2="88" y2="760"/>
+    <line x1="34" y1="800" x2="88" y2="800"/>
+    <line x1="34" y1="840" x2="88" y2="840"/>
+    <line x1="34" y1="880" x2="88" y2="880"/>
+    <line x1="34" y1="920" x2="88" y2="920"/>
+    <line x1="34" y1="960" x2="88" y2="960"/>
+  </g>
+  <line x1="76" y1="0" x2="76" y2="1000" stroke="var(--legal-margin)" stroke-width="1" opacity="0.35"/>
+</svg>
+
 <div class="app">
   <header>
-    <h1>jot.</h1>
+    <div class="header-left">
+      <h1>jot.</h1>
+      <span class="date-stamp" id="date-stamp"></span>
+    </div>
     <div class="header-right">
       <div class="zone-switch" role="tablist">
         <button class="active" data-zone="work">work <span class="hint">⌘1</span></button>
         <button data-zone="personal">personal <span class="hint">⌘2</span></button>
       </div>
+      <button class="icon-btn" id="export-btn" aria-label="Export to JSON" title="Export to JSON">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+      </button>
       <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
-        <!-- Moon: shown in light mode -->
         <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
         </svg>
-        <!-- Sun: shown in dark mode -->
         <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="5"/>
           <line x1="12" y1="1" x2="12" y2="3"/>
@@ -365,6 +620,23 @@
     </div>
   </header>
 
+  <!-- Spotlight: per-zone "one thing that matters today" -->
+  <section class="spotlight" id="spotlight" aria-label="Spotlight task">
+    <div class="spotlight-header">
+      <span class="spotlight-label">Spotlight</span>
+      <button class="spotlight-remove" id="spotlight-remove" hidden>clear</button>
+    </div>
+    <div class="spotlight-row">
+      <button class="spotlight-check" id="spotlight-check" aria-label="Mark spotlight complete"></button>
+      <textarea
+        class="spotlight-input"
+        id="spotlight-input"
+        rows="1"
+        placeholder="what's the one thing that would make today feel done?"
+      ></textarea>
+    </div>
+  </section>
+
   <div class="capture">
     <input id="capture" placeholder="jot anything — a task, a thought, paste a sketch…" autofocus autocomplete="off" />
   </div>
@@ -378,6 +650,7 @@
   <span><kbd>⌘1</kbd> work</span>
   <span><kbd>⌘2</kbd> personal</span>
   <span><kbd>/</kbd> capture</span>
+  <span><kbd>↑</kbd> promote</span>
 </div>
 
 <script>
@@ -400,9 +673,11 @@
       localStorage.setItem(THEME_KEY, 'dark');
     }
   });
-  // ───────────────────────────────────────────────────────────────────────────
 
-  const STORAGE_KEY = 'jot.v1';
+  // ── State ──────────────────────────────────────────────────────────────────
+  // v2 storage shape adds per-zone spotlight. v1 is auto-migrated.
+  const STORAGE_KEY = 'jot.v2';
+  const STORAGE_KEY_V1 = 'jot.v1';
 
   const sampleSketch = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
     <svg xmlns="http://www.w3.org/2000/svg" width="220" height="140" viewBox="0 0 220 140">
@@ -420,6 +695,10 @@
 
   const seed = {
     zone: 'work',
+    spotlight: {
+      work: { text: 'ship V3 of the pitch deck', done: false, ts: Date.now() - 10 * 60000 },
+      personal: null
+    },
     items: {
       work: [
         { id: 1, text: 'V3 of the pitch deck — add the customer-quote slide', notes: 'maybe move the timeline before pricing', img: null, done: false, ts: Date.now() - 25 * 60000 },
@@ -435,13 +714,37 @@
     }
   };
 
+  function normalize(parsed) {
+    // Defensive: fill in any missing pieces so old data keeps working.
+    const out = { zone: parsed.zone || 'work', spotlight: parsed.spotlight || {}, items: parsed.items || {} };
+    if (!out.items.work) out.items.work = [];
+    if (!out.items.personal) out.items.personal = [];
+    if (!('work' in out.spotlight)) out.spotlight.work = null;
+    if (!('personal' in out.spotlight)) out.spotlight.personal = null;
+    return out;
+  }
+
   function loadState() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return structuredClone(seed);
-      const parsed = JSON.parse(raw);
-      if (!parsed.items || !parsed.items.work || !parsed.items.personal) return structuredClone(seed);
-      return parsed;
+      // Try v2 first
+      const rawV2 = localStorage.getItem(STORAGE_KEY);
+      if (rawV2) return normalize(JSON.parse(rawV2));
+
+      // Migrate v1 (jot's original format — items only, no spotlight)
+      const rawV1 = localStorage.getItem(STORAGE_KEY_V1);
+      if (rawV1) {
+        const v1 = JSON.parse(rawV1);
+        const migrated = normalize({
+          zone: v1.zone || 'work',
+          items: v1.items || {},
+          spotlight: { work: null, personal: null }
+        });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+        return migrated;
+      }
+
+      // First run — use seed
+      return structuredClone(seed);
     } catch (e) {
       return structuredClone(seed);
     }
@@ -449,7 +752,7 @@
 
   function saveState() {
     try {
-      const toSave = { zone: state.zone, items: state.items };
+      const toSave = { zone: state.zone, spotlight: state.spotlight, items: state.items };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
     } catch (e) {
       console.warn('save failed', e);
@@ -458,10 +761,18 @@
 
   let state = loadState();
 
+  // ── DOM refs ───────────────────────────────────────────────────────────────
   const listEl = document.getElementById('list');
   const captureEl = document.getElementById('capture');
   const toastEl = document.getElementById('toast');
+  const spotlightEl = document.getElementById('spotlight');
+  const spotlightInput = document.getElementById('spotlight-input');
+  const spotlightCheck = document.getElementById('spotlight-check');
+  const spotlightRemove = document.getElementById('spotlight-remove');
+  const dateStampEl = document.getElementById('date-stamp');
+  const exportBtn = document.getElementById('export-btn');
 
+  // ── Utilities ──────────────────────────────────────────────────────────────
   function escapeHtml(s) {
     return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
@@ -475,10 +786,107 @@
     return Math.floor(hrs / 24) + 'd ago';
   }
 
-  // sync active button state with state.zone on load
+  function fmtDateStamp() {
+    const d = new Date();
+    const days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+    const months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+    return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`;
+  }
+  dateStampEl.textContent = fmtDateStamp();
+
+  function showToast(msg, undoFn) {
+    toastEl.innerHTML = `<span>${escapeHtml(msg)}</span>` + (undoFn ? `<button id="undo-btn">undo</button>` : '');
+    toastEl.classList.add('show');
+    if (undoFn) {
+      document.getElementById('undo-btn').onclick = () => { undoFn(); toastEl.classList.remove('show'); };
+    }
+    clearTimeout(toastEl._t);
+    toastEl._t = setTimeout(() => toastEl.classList.remove('show'), 5000);
+  }
+
+  // sync active zone button with state.zone on load
   document.querySelectorAll('.zone-switch button').forEach(b =>
     b.classList.toggle('active', b.dataset.zone === state.zone));
 
+  // ── Spotlight render ───────────────────────────────────────────────────────
+  function renderSpotlight() {
+    const sl = state.spotlight[state.zone];
+    const isEmpty = !sl || !sl.text;
+    spotlightEl.classList.toggle('is-empty', isEmpty);
+    spotlightEl.classList.toggle('is-done', !!(sl && sl.done));
+    spotlightInput.value = sl?.text || '';
+    spotlightInput.readOnly = !!(sl && sl.done);
+    autoResizeSpotlight();
+    spotlightRemove.hidden = isEmpty;
+  }
+
+  function autoResizeSpotlight() {
+    spotlightInput.style.height = 'auto';
+    spotlightInput.style.height = spotlightInput.scrollHeight + 'px';
+  }
+
+  function setSpotlightText(text) {
+    const z = state.zone;
+    const trimmed = text.trim();
+    if (!trimmed) {
+      state.spotlight[z] = null;
+    } else {
+      const existing = state.spotlight[z];
+      state.spotlight[z] = {
+        text: trimmed,
+        done: existing?.done || false,
+        ts: existing?.ts || Date.now()
+      };
+    }
+    saveState();
+  }
+
+  spotlightInput.addEventListener('input', () => {
+    setSpotlightText(spotlightInput.value);
+    spotlightEl.classList.toggle('is-empty', !spotlightInput.value.trim());
+    autoResizeSpotlight();
+  });
+
+  spotlightInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      spotlightInput.blur();
+    }
+  });
+
+  spotlightCheck.addEventListener('click', () => {
+    const z = state.zone;
+    const sl = state.spotlight[z];
+    if (!sl || !sl.text) return;
+    sl.done = !sl.done;
+    if (sl.done) {
+      spotlightEl.classList.add('just-done');
+      setTimeout(() => spotlightEl.classList.remove('just-done'), 500);
+    }
+    saveState();
+    renderSpotlight();
+  });
+
+  spotlightRemove.addEventListener('click', () => {
+    state.spotlight[state.zone] = null;
+    saveState();
+    renderSpotlight();
+  });
+
+  function promoteToSpotlight(itemId) {
+    const items = state.items[state.zone];
+    const idx = items.findIndex(x => x.id === itemId);
+    if (idx === -1) return;
+    const it = items[idx];
+    state.spotlight[state.zone] = { text: it.text, done: false, ts: Date.now() };
+    items.splice(idx, 1);
+    saveState();
+    renderSpotlight();
+    render();
+    showToast('moved to spotlight');
+  }
+
+  // ── List render ────────────────────────────────────────────────────────────
   function render() {
     const items = state.items[state.zone];
     if (!items || items.length === 0) {
@@ -491,7 +899,12 @@
     let html = '';
     if (open.length) html += open.map(renderItem).join('');
     if (done.length) {
-      html += `<div class="section-label">done</div>`;
+      html += `
+        <div class="section-label">
+          <span>done</span>
+          <span class="count">${done.length}</span>
+          <button class="clear-done" data-action="clear-done">clear all done</button>
+        </div>`;
       html += done.map(renderItem).join('');
     }
     listEl.innerHTML = html;
@@ -513,21 +926,12 @@
             </div>
           ` : (it.notes ? `<div class="meta-preview" data-action="expand">${escapeHtml(it.notes.slice(0,80))}${it.notes.length > 80 ? '…' : ''}</div>` : '')}
         </div>
+        ${it.done ? '' : `<button class="promote" data-action="promote" aria-label="Set as spotlight" title="Set as spotlight">↑</button>`}
       </div>
     `;
   }
 
-  function showToast(msg, undoFn) {
-    toastEl.innerHTML = `<span>${escapeHtml(msg)}</span>` + (undoFn ? `<button id="undo-btn">undo</button>` : '');
-    toastEl.classList.add('show');
-    if (undoFn) {
-      document.getElementById('undo-btn').onclick = () => { undoFn(); toastEl.classList.remove('show'); };
-    }
-    clearTimeout(toastEl._t);
-    toastEl._t = setTimeout(() => toastEl.classList.remove('show'), 5000);
-  }
-
-  // capture
+  // ── Capture ────────────────────────────────────────────────────────────────
   captureEl.addEventListener('keydown', e => {
     if (e.key === 'Enter' && captureEl.value.trim()) {
       state.items[state.zone].unshift({
@@ -562,6 +966,7 @@
     }
   });
 
+  // ── Zone switch ────────────────────────────────────────────────────────────
   document.querySelectorAll('.zone-switch button').forEach(btn => {
     btn.addEventListener('click', () => switchZone(btn.dataset.zone));
   });
@@ -570,10 +975,12 @@
     document.querySelectorAll('.zone-switch button').forEach(b =>
       b.classList.toggle('active', b.dataset.zone === z));
     saveState();
+    renderSpotlight();
     render();
     captureEl.focus();
   }
 
+  // ── Keyboard shortcuts ─────────────────────────────────────────────────────
   document.addEventListener('keydown', e => {
     const mod = e.metaKey || e.ctrlKey;
     if (mod && e.key === '1') { e.preventDefault(); switchZone('work'); }
@@ -583,11 +990,28 @@
     }
   });
 
+  // ── List interactions ──────────────────────────────────────────────────────
   listEl.addEventListener('click', e => {
+    const action = e.target.dataset.action;
+
+    // Section-level actions (not tied to an item)
+    if (action === 'clear-done') {
+      const items = state.items[state.zone];
+      const removed = items.filter(i => i.done);
+      state.items[state.zone] = items.filter(i => !i.done);
+      saveState();
+      render();
+      showToast(`cleared ${removed.length}`, () => {
+        state.items[state.zone].push(...removed);
+        saveState();
+        render();
+      });
+      return;
+    }
+
     const itemEl = e.target.closest('.item');
     if (!itemEl) return;
     const id = +itemEl.dataset.id;
-    const action = e.target.dataset.action;
     const items = state.items[state.zone];
     const it = items.find(x => x.id === id);
     if (!it) return;
@@ -622,6 +1046,8 @@
         r.readAsDataURL(f);
       };
       fi.click();
+    } else if (action === 'promote') {
+      promoteToSpotlight(id);
     }
   });
 
@@ -633,6 +1059,28 @@
     }
   });
 
+  // ── Export to JSON ─────────────────────────────────────────────────────────
+  exportBtn.addEventListener('click', () => {
+    const payload = JSON.stringify({
+      exported_at: new Date().toISOString(),
+      zone: state.zone,
+      spotlight: state.spotlight,
+      items: state.items
+    }, null, 2);
+    const blob = new Blob([payload], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `jot-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('exported');
+  });
+
+  // ── Initial paint ──────────────────────────────────────────────────────────
+  renderSpotlight();
   render();
 </script>
 </body>
