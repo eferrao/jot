@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>jot.</title>
+<style>
+  * { box-sizing: border-box; }
+
+  :root {
+    --paper: #f6f1e7;
+    --paper-2: #efe8d8;
+    --line: #e3dac6;
+    --ink: #2a2520;
+    --ink-soft: #6b6358;
+    --ink-faint: #9a9080;
+    --accent: #b8543b;
+    --done: #c8beac;
+  }
+
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    min-height: 100vh;
+    background-image: radial-gradient(rgba(0,0,0,0.018) 1px, transparent 1px);
+    background-size: 18px 18px;
+  }
+
+  .app { max-width: 680px; margin: 0 auto; padding: 40px 28px 140px; }
+
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+
+  h1 {
+    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+    font-weight: 400;
+    font-size: 30px;
+    margin: 0;
+    letter-spacing: -0.5px;
+    color: var(--ink);
+  }
+
+  .zone-switch {
+    display: flex;
+    gap: 2px;
+    background: rgba(0,0,0,0.05);
+    padding: 3px;
+    border-radius: 22px;
+  }
+
+  .zone-switch button {
+    background: transparent;
+    border: 0;
+    padding: 7px 16px;
+    font-size: 14px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    border-radius: 18px;
+    font-family: inherit;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .zone-switch button.active {
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  .zone-switch .hint { color: var(--ink-faint); font-size: 11px; }
+
+  .capture {
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed var(--line);
+    position: relative;
+  }
+
+  .capture input {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    font-size: 18px;
+    font-family: inherit;
+    color: var(--ink);
+    padding: 10px 0 10px 24px;
+    outline: none;
+  }
+
+  .capture::before {
+    content: "+";
+    position: absolute;
+    left: 2px; top: 10px;
+    color: var(--ink-faint);
+    font-size: 20px;
+    font-weight: 300;
+  }
+
+  .capture input::placeholder { color: var(--ink-faint); }
+
+  .list { display: flex; flex-direction: column; }
+
+  .item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 11px 8px 11px 4px;
+    border-radius: 6px;
+    cursor: text;
+    transition: background 0.12s;
+    border-bottom: 1px solid transparent;
+  }
+
+  .item:hover { background: rgba(0,0,0,0.022); }
+
+  .item .check {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid var(--ink-faint);
+    border-radius: 50%;
+    margin-top: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+  }
+  .item .check:hover { border-color: var(--ink-soft); transform: scale(1.05); }
+  .item.done .check { background: var(--ink-soft); border-color: var(--ink-soft); }
+  .item.done .check::after {
+    content: "✓"; color: var(--paper); font-size: 11px; font-weight: 600; line-height: 1;
+  }
+
+  .item .body { flex: 1; min-width: 0; cursor: pointer; }
+  .item .text { font-size: 16px; word-wrap: break-word; color: var(--ink); }
+  .item.done .text {
+    color: var(--done);
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+  }
+
+  .item .thumb {
+    margin-top: 10px;
+    max-width: 220px;
+    max-height: 160px;
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 0 0 1px var(--line);
+    display: block;
+  }
+
+  .item .meta-preview {
+    font-size: 13px;
+    color: var(--ink-faint);
+    margin-top: 3px;
+    font-style: italic;
+  }
+
+  .item.expanded {
+    background: var(--paper-2);
+    padding: 14px 12px;
+    margin: 4px 0;
+  }
+  .item.expanded:hover { background: var(--paper-2); }
+
+  .notes {
+    margin-top: 10px;
+    width: 100%;
+    background: transparent;
+    border: 0;
+    border-left: 2px solid var(--line);
+    padding: 4px 0 4px 12px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--ink-soft);
+    resize: vertical;
+    outline: none;
+    min-height: 36px;
+    line-height: 1.5;
+  }
+  .notes::placeholder { color: var(--ink-faint); font-style: italic; }
+
+  .actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    font-size: 12px;
+    color: var(--ink-faint);
+  }
+  .actions button {
+    background: none; border: 0; font: inherit;
+    color: var(--ink-faint); cursor: pointer; padding: 4px 0;
+  }
+  .actions button:hover { color: var(--ink-soft); }
+  .actions .ts { margin-left: auto; font-size: 11px; }
+
+  .empty {
+    text-align: center;
+    color: var(--ink-faint);
+    padding: 80px 20px;
+    font-style: italic;
+    font-size: 15px;
+  }
+
+  .section-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--ink-faint);
+    margin: 24px 4px 8px;
+    font-weight: 500;
+  }
+  .section-label:first-child { margin-top: 8px; }
+
+  .footer-hints {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(42,37,32,0.88);
+    color: var(--paper);
+    padding: 8px 16px;
+    border-radius: 22px;
+    font-size: 12px;
+    display: flex;
+    gap: 18px;
+    backdrop-filter: blur(8px);
+  }
+  .footer-hints kbd {
+    background: rgba(255,255,255,0.15);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: "SF Mono", Menlo, monospace;
+    font-size: 11px;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: var(--paper);
+    padding: 9px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .toast.show { opacity: 1; pointer-events: auto; }
+  .toast button {
+    background: none; border: 0;
+    color: var(--paper);
+    text-decoration: underline;
+    cursor: pointer; font: inherit; padding: 0;
+  }
+
+  @media (max-width: 540px) {
+    .footer-hints { display: none; }
+    .app { padding: 24px 18px 80px; }
+    h1 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>jot.</h1>
+    <div class="zone-switch" role="tablist">
+      <button class="active" data-zone="work">work <span class="hint">⌘1</span></button>
+      <button data-zone="personal">personal <span class="hint">⌘2</span></button>
+    </div>
+  </header>
+
+  <div class="capture">
+    <input id="capture" placeholder="jot anything — a task, a thought, paste a sketch…" autofocus autocomplete="off" />
+  </div>
+
+  <div class="list" id="list"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="footer-hints">
+  <span><kbd>⌘1</kbd> work</span>
+  <span><kbd>⌘2</kbd> personal</span>
+  <span><kbd>/</kbd> capture</span>
+</div>
+
+<script>
+  const STORAGE_KEY = 'jot.v1';
+
+  const sampleSketch = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="220" height="140" viewBox="0 0 220 140">
+      <rect width="220" height="140" fill="#fdfaf2"/>
+      <rect x="12" y="12" width="50" height="116" fill="none" stroke="#2a2520" stroke-width="1.5"/>
+      <rect x="72" y="12" width="136" height="44" fill="none" stroke="#2a2520" stroke-width="1.5"/>
+      <rect x="72" y="64" width="62" height="64" fill="none" stroke="#2a2520" stroke-width="1.5"/>
+      <rect x="144" y="64" width="64" height="64" fill="none" stroke="#2a2520" stroke-width="1.5"/>
+      <text x="24" y="70" font-family="Georgia" font-size="10" fill="#6b6358">nav</text>
+      <text x="125" y="38" font-family="Georgia" font-size="10" fill="#6b6358">header / KPIs</text>
+      <text x="92" y="98" font-family="Georgia" font-size="10" fill="#6b6358">chart</text>
+      <text x="160" y="98" font-family="Georgia" font-size="10" fill="#6b6358">recent</text>
+    </svg>
+  `);
+
+  const seed = {
+    zone: 'work',
+    items: {
+      work: [
+        { id: 1, text: 'V3 of the pitch deck — add the customer-quote slide', notes: 'maybe move the timeline before pricing', img: null, done: false, ts: Date.now() - 25 * 60000 },
+        { id: 2, text: 'dashboard layout — try the 3-column variant', notes: '', img: sampleSketch, done: false, ts: Date.now() - 2 * 3600000 },
+        { id: 3, text: 'follow up w/ Maya re: contract', notes: '', img: null, done: false, ts: Date.now() - 4 * 3600000 },
+        { id: 4, text: 'update brand colors in figma', notes: '', img: null, done: true, ts: Date.now() - 26 * 3600000 },
+      ],
+      personal: [
+        { id: 5, text: 'call mom — sunday', notes: '', img: null, done: false, ts: Date.now() - 30 * 60000 },
+        { id: 6, text: 'ask sara about her dentist', notes: '', img: null, done: false, ts: Date.now() - 3 * 3600000 },
+        { id: 7, text: 'renew library books', notes: '', img: null, done: true, ts: Date.now() - 48 * 3600000 },
+      ]
+    }
+  };
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return structuredClone(seed);
+      const parsed = JSON.parse(raw);
+      if (!parsed.items || !parsed.items.work || !parsed.items.personal) return structuredClone(seed);
+      return parsed;
+    } catch (e) {
+      return structuredClone(seed);
+    }
+  }
+
+  function saveState() {
+    try {
+      const toSave = { zone: state.zone, items: state.items };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+    } catch (e) {
+      console.warn('save failed', e);
+    }
+  }
+
+  let state = loadState();
+
+  const listEl = document.getElementById('list');
+  const captureEl = document.getElementById('capture');
+  const toastEl = document.getElementById('toast');
+
+  function escapeHtml(s) {
+    return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function fmtTime(ts) {
+    const mins = Math.floor((Date.now() - ts) / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return mins + 'm ago';
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + 'h ago';
+    return Math.floor(hrs / 24) + 'd ago';
+  }
+
+  // sync active button state with state.zone on load
+  document.querySelectorAll('.zone-switch button').forEach(b =>
+    b.classList.toggle('active', b.dataset.zone === state.zone));
+
+  function render() {
+    const items = state.items[state.zone];
+    if (!items || items.length === 0) {
+      listEl.innerHTML = '<div class="empty">a fresh page. start typing above ↑</div>';
+      return;
+    }
+    const open = items.filter(i => !i.done).sort((a,b) => b.ts - a.ts);
+    const done = items.filter(i => i.done).sort((a,b) => b.ts - a.ts);
+
+    let html = '';
+    if (open.length) html += open.map(renderItem).join('');
+    if (done.length) {
+      html += `<div class="section-label">done</div>`;
+      html += done.map(renderItem).join('');
+    }
+    listEl.innerHTML = html;
+  }
+
+  function renderItem(it) {
+    return `
+      <div class="item ${it.done ? 'done' : ''} ${it.expanded ? 'expanded' : ''}" data-id="${it.id}">
+        <div class="check" data-action="toggle" role="checkbox" aria-checked="${it.done}"></div>
+        <div class="body">
+          <div class="text" data-action="expand">${escapeHtml(it.text)}</div>
+          ${it.img ? `<img src="${it.img}" class="thumb" alt="attached sketch" data-action="expand" />` : ''}
+          ${it.expanded ? `
+            <textarea class="notes" placeholder="any thoughts, links, follow-ups…" data-action="notes">${escapeHtml(it.notes || '')}</textarea>
+            <div class="actions">
+              <button data-action="attach">+ image</button>
+              <button data-action="delete">delete</button>
+              <span class="ts">captured ${fmtTime(it.ts)}</span>
+            </div>
+          ` : (it.notes ? `<div class="meta-preview" data-action="expand">${escapeHtml(it.notes.slice(0,80))}${it.notes.length > 80 ? '…' : ''}</div>` : '')}
+        </div>
+      </div>
+    `;
+  }
+
+  function showToast(msg, undoFn) {
+    toastEl.innerHTML = `<span>${escapeHtml(msg)}</span>` + (undoFn ? `<button id="undo-btn">undo</button>` : '');
+    toastEl.classList.add('show');
+    if (undoFn) {
+      document.getElementById('undo-btn').onclick = () => { undoFn(); toastEl.classList.remove('show'); };
+    }
+    clearTimeout(toastEl._t);
+    toastEl._t = setTimeout(() => toastEl.classList.remove('show'), 5000);
+  }
+
+  // capture
+  captureEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && captureEl.value.trim()) {
+      state.items[state.zone].unshift({
+        id: Date.now(), text: captureEl.value.trim(),
+        notes: '', img: null, done: false, ts: Date.now()
+      });
+      captureEl.value = '';
+      saveState();
+      render();
+    }
+  });
+
+  captureEl.addEventListener('paste', e => {
+    const clip = e.clipboardData?.items || [];
+    for (const it of clip) {
+      if (it.type.startsWith('image/')) {
+        const f = it.getAsFile();
+        const r = new FileReader();
+        r.onload = () => {
+          state.items[state.zone].unshift({
+            id: Date.now(), text: captureEl.value.trim() || 'sketch',
+            notes: '', img: r.result, done: false, ts: Date.now()
+          });
+          captureEl.value = '';
+          saveState();
+          render();
+        };
+        r.readAsDataURL(f);
+        e.preventDefault();
+        return;
+      }
+    }
+  });
+
+  document.querySelectorAll('.zone-switch button').forEach(btn => {
+    btn.addEventListener('click', () => switchZone(btn.dataset.zone));
+  });
+  function switchZone(z) {
+    state.zone = z;
+    document.querySelectorAll('.zone-switch button').forEach(b =>
+      b.classList.toggle('active', b.dataset.zone === z));
+    saveState();
+    render();
+    captureEl.focus();
+  }
+
+  document.addEventListener('keydown', e => {
+    const mod = e.metaKey || e.ctrlKey;
+    if (mod && e.key === '1') { e.preventDefault(); switchZone('work'); }
+    else if (mod && e.key === '2') { e.preventDefault(); switchZone('personal'); }
+    else if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+      e.preventDefault(); captureEl.focus();
+    }
+  });
+
+  listEl.addEventListener('click', e => {
+    const itemEl = e.target.closest('.item');
+    if (!itemEl) return;
+    const id = +itemEl.dataset.id;
+    const action = e.target.dataset.action;
+    const items = state.items[state.zone];
+    const it = items.find(x => x.id === id);
+    if (!it) return;
+
+    if (action === 'toggle') {
+      it.done = !it.done;
+      it.expanded = false;
+      it.ts = Date.now();
+      saveState();
+      render();
+    } else if (action === 'expand') {
+      items.forEach(x => { if (x.id !== id) x.expanded = false; });
+      it.expanded = !it.expanded;
+      render();
+    } else if (action === 'delete') {
+      const idx = items.indexOf(it);
+      items.splice(idx, 1);
+      saveState();
+      render();
+      showToast('deleted', () => {
+        items.splice(idx, 0, it);
+        saveState();
+        render();
+      });
+    } else if (action === 'attach') {
+      const fi = document.createElement('input');
+      fi.type = 'file'; fi.accept = 'image/*';
+      fi.onchange = () => {
+        const f = fi.files[0]; if (!f) return;
+        const r = new FileReader();
+        r.onload = () => { it.img = r.result; saveState(); render(); };
+        r.readAsDataURL(f);
+      };
+      fi.click();
+    }
+  });
+
+  listEl.addEventListener('input', e => {
+    if (e.target.classList.contains('notes')) {
+      const id = +e.target.closest('.item').dataset.id;
+      const it = state.items[state.zone].find(x => x.id === id);
+      if (it) { it.notes = e.target.value; saveState(); }
+    }
+  });
+
+  render();
+</script>
+</body>
+</html>
