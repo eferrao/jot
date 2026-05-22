@@ -178,16 +178,18 @@
     color: var(--ink-soft);
     font-weight: 600;
   }
-  .spotlight-remove {
+  .spotlight-remove,
+  .spotlight-back {
     background: none;
     border: 0;
     color: var(--ink-faint);
-    font-size: 12px;
     cursor: pointer;
+    font-size: 13px;
     font-family: inherit;
     padding: 2px 4px;
   }
-  .spotlight-remove:hover { color: var(--ink-soft); }
+  .spotlight-remove:hover,
+  .spotlight-back:hover { color: var(--ink-soft); }
   .spotlight-row {
     display: flex;
     align-items: flex-start;
@@ -649,7 +651,7 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
   <section class="spotlight" id="spotlight" aria-label="Spotlight task">
     <div class="spotlight-header">
       <span class="spotlight-label">Spotlight</span>
-      <button class="spotlight-remove" id="spotlight-remove" hidden>clear</button>
+      <button class="spotlight-back" id="spotlight-back" hidden>↓ back to list</button>
     </div>
     <div class="spotlight-row">
       <button class="spotlight-check" id="spotlight-check" aria-label="Mark spotlight complete"></button>
@@ -659,6 +661,7 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
         rows="1"
         placeholder="what's the one thing that would make today feel done?"
       ></textarea>
+      <button class="spotlight-remove" id="spotlight-remove" hidden>clear</button>
     </div>
   </section>
 
@@ -794,6 +797,7 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
   const spotlightInput = document.getElementById('spotlight-input');
   const spotlightCheck = document.getElementById('spotlight-check');
   const spotlightRemove = document.getElementById('spotlight-remove');
+  const spotlightBack = document.getElementById('spotlight-back');
   const dateStampEl = document.getElementById('date-stamp');
   const exportBtn = document.getElementById('export-btn');
 
@@ -843,6 +847,7 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
     spotlightInput.readOnly = !!(sl && sl.done);
     autoResizeSpotlight();
     spotlightRemove.hidden = isEmpty;
+    spotlightBack.hidden = isEmpty;
   }
 
   function autoResizeSpotlight() {
@@ -904,6 +909,18 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
     state.spotlight[state.zone] = null;
     saveState();
     renderSpotlight();
+  });
+
+  spotlightBack.addEventListener('click', () => {
+    const z = state.zone;
+    const sl = state.spotlight[z];
+    if (!sl || !sl.text) return;
+    state.items[z].push({ id: Date.now(), text: sl.text, notes: '', img: null, done: false, ts: Date.now() });
+    state.spotlight[z] = null;
+    saveState();
+    renderSpotlight();
+    render();
+    showToast('moved back to list');
   });
 
   function promoteToSpotlight(itemId) {
