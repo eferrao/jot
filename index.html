@@ -533,9 +533,34 @@
     .header-left { flex-direction: column; gap: 4px; align-items: flex-start; }
     .date-stamp { font-size: 12px; }
   }
+#rabbit-overlay {
+  position: fixed; inset: 0;
+  background: #f6f1e7;
+  z-index: 100;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 1rem;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+#rabbit-overlay.visible { opacity: 1; pointer-events: auto; }
+#rabbit-overlay img { width: 180px; }
+#rabbit-overlay h2 { font-size: 1.5rem; color: #2a2520; margin: 0; }
+#rabbit-overlay p { color: #6b6358; margin: 0; }
+
+html[data-theme="dark"] #rabbit-overlay { background: #1c1916; }
+html[data-theme="dark"] #rabbit-overlay h2 { color: #e8e0d0; }
+html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
+
 </style>
 </head>
 <body>
+
+<div id="rabbit-overlay" aria-live="polite" aria-atomic="true">
+  <img src="rabbit.png" alt="Rabbit">
+  <h2>You did the thing. 🌟</h2>
+  <p>The ONE thing. That's everything.</p>
+</div>
 
 <!-- Decorative ripped legal-pad accent on the right edge (from the-board) -->
 <svg class="legal-pad-accent" viewBox="0 0 90 1000" preserveAspectRatio="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
@@ -858,13 +883,21 @@
     const z = state.zone;
     const sl = state.spotlight[z];
     if (!sl || !sl.text) return;
-    sl.done = !sl.done;
-    if (sl.done) {
-      spotlightEl.classList.add('just-done');
-      setTimeout(() => spotlightEl.classList.remove('just-done'), 500);
-    }
+
+    // Move to done list
+    state.items[z].push({ id: Date.now(), text: sl.text, notes: '', img: null, done: true, ts: Date.now() });
+    state.spotlight[z] = null;
     saveState();
     renderSpotlight();
+    render();
+
+    // Rabbit overlay
+    const overlay = document.getElementById('rabbit-overlay');
+    overlay.classList.add('visible');
+    setTimeout(() => {
+      overlay.classList.remove('visible');
+      overlay.addEventListener('transitionend', () => overlay.remove(), { once: true });
+    }, 2500);
   });
 
   spotlightRemove.addEventListener('click', () => {
