@@ -24,6 +24,31 @@ the current Eastern hour is a send slot (no-op otherwise) and reads replies
 every run. This keeps timing right across EST/EDT, since GitHub cron is UTC
 with no daylight-saving awareness.
 
+## How to use it (from your inbox)
+
+You interact entirely by **replying to the emails** — no app, no link, no
+commands to memorize. Reply from the same address that's configured in
+`CONVERSATION_EMAILS`; replies from any other address are ignored.
+
+- **Set your #1 for the day:** reply to the morning email with your task.
+  Both of these work the same — the preamble is stripped automatically:
+  - `Ship the Q2 report`
+  - `My highest priority is ship the Q2 report`
+- **Mark it done:** reply to any check-in with a completion word —
+  `done`, `finished`, `complete`, `did it`, `all set`, `yes`, `yep`. The next
+  check-in then congratulates you instead of nudging.
+- **Say it's not done yet:** reply naturally — `not yet`, `still working`,
+  `almost`, `in progress`. Negations are understood, so it keeps checking in
+  (e.g. `not done yet` is *not* treated as done).
+- **Change your mind:** before it's marked done, reply with a different task
+  and that becomes your new #1 for the day.
+
+Notes on timing and scope:
+- Replies are read on the **next hourly run**, not instantly — so a reply may
+  take up to an hour to register.
+- It's **one priority per address per day**; each morning starts fresh.
+- Subject lines don't matter — replying keeps the thread, which is all it needs.
+
 ## One-time setup
 
 ### 1. Create the dedicated Gmail inbox
