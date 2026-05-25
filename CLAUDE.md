@@ -17,6 +17,7 @@ Toggle logic is in the `<script>` block near the bottom of `index.html`. Theme p
 | Key | Description |
 |-----|-------------|
 | `jot.theme` | `"light"` or `"dark"` |
+| `jot.jocko` | `"on"` or `"off"` — Jocko mode (overrides theme visuals) |
 | `jot.v2` | Main app state (see below) |
 | `jot.v1` | Legacy format — auto-migrated to v2 on first load |
 
@@ -50,6 +51,7 @@ Toggle logic is in the `<script>` block near the bottom of `index.html`. Theme p
 - **Clear done**: removes all completed tasks in the current zone
 - **Export**: downloads `jot-YYYY-MM-DD.json` with full state
 - **Dark mode**: toggle button in header; persists across sessions; respects OS preference on first load
+- **Jocko mode**: ⚡ toggle in header; flips the whole format (blaze/military palette, uppercase, hard edges) and shows an escalating "you're being lazy" banner driven by the open-task count; persists across sessions
 - **Ripped-paper accent**: decorative CSS on zone divider
 
 ## Branch / PR Workflow
