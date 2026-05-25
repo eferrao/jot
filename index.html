@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>jot.</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; }
 
@@ -26,8 +27,8 @@
     --footer-kbd: rgba(255,255,255,0.15);
     --theme-btn-bg: rgba(0,0,0,0.05);
     --theme-btn-hover: rgba(0,0,0,0.1);
-    --legal-pad: #fef3c7;
-    --legal-rule: #d4c96a;
+    --legal-pad: #fef0a0;
+    --legal-rule: #c9a830;
     --legal-margin: #f9a8a8;
   }
 
@@ -55,17 +56,26 @@
     --legal-margin: #6b3a3a;
   }
 
+  /* Zone-based spotlight colors */
+  .app[data-zone="work"]     { --spotlight-bg: #e8edf5; --spotlight-border: #6b87b8; --spotlight-glow: 0 4px 18px rgba(107,135,184,0.18); }
+  .app[data-zone="personal"] { --spotlight-bg: #ede8f5; --spotlight-border: #9b87c4; --spotlight-glow: 0 4px 18px rgba(155,135,196,0.18); }
+  html[data-theme="dark"] .app[data-zone="work"]     { --spotlight-bg: #1a1f2a; --spotlight-border: #5a7aab; }
+  html[data-theme="dark"] .app[data-zone="personal"] { --spotlight-bg: #221d2e; --spotlight-border: #7a6aab; }
+
   html, body { margin: 0; padding: 0; }
   body {
-    background: var(--paper);
+    background: linear-gradient(180deg, #f6f1e7 0%, #f0e0cc 100%);
+    background-attachment: fixed;
     color: var(--ink);
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+    font-family: "Lora", "Georgia", serif;
     font-size: 16px;
     line-height: 1.5;
     min-height: 100vh;
-    background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
-    background-size: 18px 18px;
     transition: background-color 0.25s, color 0.25s;
+  }
+  html[data-theme="dark"] body {
+    background: linear-gradient(180deg, #1c1916 0%, #2a2010 100%);
+    background-attachment: fixed;
   }
 
   /* Ripped legal-pad accent on the right edge — nods to the-board's design.
@@ -77,7 +87,7 @@
     height: 100vh;
     width: 90px;
     pointer-events: none;
-    opacity: 0.55;
+    opacity: 0.82;
     z-index: 0;
     transform: rotate(1.5deg);
     transform-origin: top right;
@@ -112,7 +122,7 @@
   }
 
   .date-stamp {
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+    font-family: "Lora", "Georgia", serif;
     font-style: italic;
     font-size: 13px;
     color: var(--ink-faint);
@@ -226,7 +236,7 @@
     background: transparent;
     border: 0;
     outline: 0;
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+    font-family: "Lora", "Georgia", serif;
     font-size: 19px;
     color: var(--ink);
     line-height: 1.45;
@@ -562,7 +572,7 @@
     background: var(--footer-kbd);
     padding: 2px 6px;
     border-radius: 3px;
-    font-family: "SF Mono", Menlo, monospace;
+    font-family: "Lora", "Georgia", serif;
     font-size: 11px;
   }
 
@@ -597,15 +607,12 @@
   #goalsSection.active { display: block; }
 
   .goal-card {
-    background: var(--paper);
-    border: 1px solid var(--border, var(--line));
-    border-left: 3px solid var(--accent);
     border-radius: 12px;
     padding: 16px 18px;
     margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
   }
-  .goal-card.status-onhold { border-left-color: var(--ink-faint); }
-  .goal-card.status-completed { border-left-color: var(--ink-faint); opacity: 0.6; }
+  .goal-card.status-completed { opacity: 0.6; }
   .goal-title-input {
     width: 100%; border: none; background: transparent;
     font-size: 16px; font-weight: 600; color: var(--ink);
@@ -618,7 +625,7 @@
     font-family: inherit; line-height: 1.5;
   }
   .goal-status-select {
-    margin-top: 10px; font-size: 12px; color: var(--ink-soft);
+    margin-top: 0; font-size: 12px; color: var(--ink-soft);
     background: transparent; border: 1px solid var(--line);
     border-radius: 6px; padding: 3px 8px; cursor: pointer; font-family: inherit;
   }
@@ -721,7 +728,12 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
   color: var(--ink-soft); font-family: inherit; white-space: nowrap;
 }
 .goal-zone-assign button:hover { border-color: var(--accent); color: var(--accent); }
-.goal-zone-assign button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.goal-zone-assign button[data-zone="work"].active   { background: #6b87b8; border-color: #6b87b8; color: #fff; }
+.goal-zone-assign button[data-zone="personal"].active { background: #9b87c4; border-color: #9b87c4; color: #fff; }
+.goal-color-picker { display: flex; gap: 6px; margin: 6px 0 16px; }
+.color-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0; }
+.color-dot.active { border-color: var(--ink); }
+.color-dot:hover { transform: scale(1.2); }
 .goal-tasks-empty { font-size: 13px; color: var(--ink-faint); padding: 8px 0 4px; }
 
 /* Compact capture inside goal card */
@@ -1081,6 +1093,7 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
   // sync active zone button with state.zone on load
   document.querySelectorAll('.zone-switch button[data-zone]').forEach(b =>
     b.classList.toggle('active', b.dataset.zone === state.zone));
+  document.querySelector('.app').dataset.zone = state.zone;
 
   // ── Spotlight render ───────────────────────────────────────────────────────
   function renderSpotlight() {
@@ -1349,6 +1362,7 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
     state.zone = z;
     document.querySelectorAll('.zone-switch button[data-zone]').forEach(b =>
       b.classList.toggle('active', b.dataset.zone === z));
+    document.querySelector('.app').dataset.zone = z;
     saveState();
     renderSpotlight();
     render();
@@ -1460,7 +1474,7 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
       if (val === '__new__') {
         const newTitle = prompt('Goal name:');
         if (newTitle && newTitle.trim()) {
-          const newGoal = { id: Date.now(), title: newTitle.trim(), description: '', status: 'active', ts: Date.now() };
+          const newGoal = { id: Date.now(), title: newTitle.trim(), description: '', status: 'active', color: 'sage', ts: Date.now() };
           state.goals.push(newGoal);
           it.goalId = newGoal.id;
         }
@@ -1553,9 +1567,25 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
     }
   }
 
+  const GOAL_COLORS = {
+    sage:     { bg:'#e8f0e8', border:'#7aab87', darkBg:'#1a2420', darkBorder:'#5a9070' },
+    lavender: { bg:'#ede8f5', border:'#9b87c4', darkBg:'#221d2e', darkBorder:'#7a6aab' },
+    slate:    { bg:'#e8edf5', border:'#6b87b8', darkBg:'#1a1f2a', darkBorder:'#5a7aab' },
+    amber:    { bg:'#f0e6d2', border:'#c9973a', darkBg:'#2a2418', darkBorder:'#b88c3e' },
+    rose:     { bg:'#f5e8e8', border:'#c47a7a', darkBg:'#2a1a1a', darkBorder:'#ab5a5a' },
+  };
+
   function renderGoalCard(goal) {
     const div = document.createElement('div');
     div.className = `goal-card status-${goal.status}`;
+    const isDark = document.documentElement.dataset.theme === 'dark';
+    const colorKey = goal.color || 'sage';
+    const c = GOAL_COLORS[colorKey];
+    div.style.background = isDark ? c.darkBg : c.bg;
+    div.style.border = 'none';
+    div.style.borderTop = `4px solid ${isDark ? c.darkBorder : c.border}`;
+    div.style.borderRadius = '12px';
+    div.style.boxShadow = '0 2px 8px rgba(0,0,0,0.07)';
     div.dataset.goalId = goal.id;
 
     const titleInput = document.createElement('input');
@@ -1631,6 +1661,22 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
     header.appendChild(zoneAssign);
     div.appendChild(header);
     div.appendChild(descInput);
+
+    // --- color picker ---
+    const colorPicker = document.createElement('div');
+    colorPicker.className = 'goal-color-picker';
+    Object.entries(GOAL_COLORS).forEach(([key, gc]) => {
+      const dot = document.createElement('button');
+      dot.className = 'color-dot' + (colorKey === key ? ' active' : '');
+      dot.style.background = isDark ? gc.darkBorder : gc.border;
+      dot.title = key;
+      dot.addEventListener('click', () => {
+        const g = state.goals.find(x => x.id === goal.id);
+        if (g) { g.color = key; saveState(); renderGoals(); }
+      });
+      colorPicker.appendChild(dot);
+    });
+    div.appendChild(colorPicker);
     div.appendChild(statusSelect);
 
     // --- task list ---
@@ -1673,7 +1719,7 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
   }
 
   addGoalBtn.addEventListener('click', () => {
-    const goal = { id: Date.now(), title: '', description: '', status: 'active', zone: null, ts: Date.now() };
+    const goal = { id: Date.now(), title: '', description: '', status: 'active', zone: null, color: 'sage', ts: Date.now() };
     state.goals.unshift(goal);
     saveState();
     renderGoals();
@@ -1761,7 +1807,7 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
       if (val === '__new__') {
         const newTitle = prompt('Goal name:');
         if (newTitle && newTitle.trim()) {
-          const newGoal = { id: Date.now(), title: newTitle.trim(), description: '', status: 'active', ts: Date.now() };
+          const newGoal = { id: Date.now(), title: newTitle.trim(), description: '', status: 'active', color: 'sage', ts: Date.now() };
           state.goals.push(newGoal);
           it.goalId = newGoal.id;
         }
