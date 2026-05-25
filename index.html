@@ -326,6 +326,17 @@
     text-decoration: line-through;
     text-decoration-thickness: 1px;
   }
+  .surprise-btn {
+    display: block;
+    margin: 16px auto 0;
+    background: transparent;
+    border: none;
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+    cursor: pointer;
+    padding: 2px 6px;
+  }
+  .surprise-btn:hover { color: var(--ink-soft); }
   .spotlight-meta { margin-top: 8px; }
   .spotlight-img-wrap { margin-bottom: 4px; }
   .spotlight-notes-preview {
@@ -793,6 +804,7 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
       </div>
       <div class="spotlight-notes-preview" id="spotlight-notes"></div>
     </div>
+    <button class="surprise-btn" id="surprise-btn" hidden>🎲 surprise me</button>
   </section>
 
   <div class="capture">
@@ -971,6 +983,7 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
   const spotlightCheck = document.getElementById('spotlight-check');
   const spotlightRemove = document.getElementById('spotlight-remove');
   const spotlightBack = document.getElementById('spotlight-back');
+  const surpriseBtn = document.getElementById('surprise-btn');
   const dateStampEl = document.getElementById('date-stamp');
   const exportBtn = document.getElementById('export-btn');
 
@@ -1021,6 +1034,8 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
     autoResizeSpotlight();
     spotlightRemove.hidden = isEmpty;
     spotlightBack.hidden = isEmpty;
+    const undone = (state.items[state.zone] || []).filter(i => !i.done);
+    surpriseBtn.hidden = !isEmpty || undone.length === 0;
     const metaEl   = document.getElementById('spotlight-meta');
     const imgWrap  = document.getElementById('spotlight-img-wrap');
     const imgEl    = document.getElementById('spotlight-img');
@@ -1122,6 +1137,19 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
     render();
     showToast('moved to spotlight');
   }
+
+  surpriseBtn.addEventListener('click', () => {
+    const z = state.zone;
+    const undone = (state.items[z] || []).filter(i => !i.done);
+    if (!undone.length) return;
+    const it = undone[Math.floor(Math.random() * undone.length)];
+    state.spotlight[z] = { text: it.text, done: false, ts: Date.now(), notes: it.notes || '', img: it.img || null };
+    state.items[z].splice(state.items[z].findIndex(x => x.id === it.id), 1);
+    saveState();
+    renderSpotlight();
+    render();
+    showToast('✦ spotlight set');
+  });
 
   // ── List render ────────────────────────────────────────────────────────────
   function render() {
