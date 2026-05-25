@@ -62,6 +62,88 @@
   html[data-theme="dark"] .app[data-zone="work"]     { --spotlight-bg: #1a1f2a; --spotlight-border: #5a7aab; }
   html[data-theme="dark"] .app[data-zone="personal"] { --spotlight-bg: #221d2e; --spotlight-border: #7a6aab; }
 
+  /* ──────────────────── JOCKO MODE ────────────────────
+     Discipline equals freedom. Placed after the dark block so its
+     variables win when both data-theme="dark" and data-jocko="on". */
+  html[data-jocko="on"] {
+    --paper: #0a0a0a;
+    --paper-2: #161616;
+    --line: #332f24;
+    --ink: #f2f2f2;
+    --ink-soft: #b7c25e;
+    --ink-faint: #6f7a36;
+    --accent: #ff4500;
+    --spotlight-bg: #161616;
+    --spotlight-border: #ff4500;
+    --spotlight-glow: 0 0 0 2px #ff4500;
+    --done: #555048;
+    --dot-color: rgba(255,255,255,0.02);
+    --zone-bg: rgba(255,255,255,0.06);
+    --zone-active-shadow: none;
+    --footer-bg: rgba(255,69,0,0.92);
+    --footer-kbd: rgba(0,0,0,0.35);
+    --theme-btn-bg: rgba(255,69,0,0.15);
+    --theme-btn-hover: rgba(255,69,0,0.35);
+    --legal-pad: #161616;
+    --legal-rule: #333028;
+    --legal-margin: #ff4500;
+  }
+
+  html[data-jocko="on"] body {
+    font-family: "Arial Narrow", "Roboto Condensed", "Helvetica Neue Condensed", Impact, system-ui, sans-serif;
+    letter-spacing: 0.3px;
+  }
+  html[data-jocko="on"] h1 {
+    font-family: "Arial Narrow", Impact, sans-serif;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--accent);
+  }
+  /* Hard edges everywhere — no soft corners on duty. */
+  html[data-jocko="on"] .spotlight,
+  html[data-jocko="on"] .item,
+  html[data-jocko="on"] .item.expanded,
+  html[data-jocko="on"] .zone-switch,
+  html[data-jocko="on"] .zone-switch button,
+  html[data-jocko="on"] .theme-toggle,
+  html[data-jocko="on"] .icon-btn,
+  html[data-jocko="on"] .check,
+  html[data-jocko="on"] .spotlight-check,
+  html[data-jocko="on"] .footer-hints,
+  html[data-jocko="on"] .toast { border-radius: 0 !important; }
+  /* Shout the work. */
+  html[data-jocko="on"] .item .text,
+  html[data-jocko="on"] .spotlight-input,
+  html[data-jocko="on"] .capture input,
+  html[data-jocko="on"] .section-label span:first-child { text-transform: uppercase; }
+  html[data-jocko="on"] .item {
+    border-left: 3px solid var(--line);
+    padding-left: 8px;
+  }
+  html[data-jocko="on"] .item:not(.done) { border-left-color: var(--accent); }
+  html[data-jocko="on"] #jocko-toggle { background: var(--accent); color: #000; }
+
+  /* The taunt banner — only visible in Jocko mode. */
+  .jocko-banner { display: none; }
+  html[data-jocko="on"] .jocko-banner {
+    display: block;
+    background: var(--accent);
+    color: #0a0a0a;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 15px;
+    line-height: 1.35;
+    padding: 12px 16px;
+    margin: 0 0 22px;
+    border: 2px solid #000;
+  }
+  html[data-jocko="on"] .jocko-banner::before {
+    content: "⚡ JOCKO SAYS: ";
+    color: #0a0a0a;
+  }
+
   html, body { margin: 0; padding: 0; }
   body {
     background: linear-gradient(180deg, #f6f1e7 0%, #f0e0cc 100%);
@@ -834,6 +916,11 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
           <line x1="12" y1="15" x2="12" y2="3"/>
         </svg>
       </button>
+      <button class="icon-btn" id="jocko-toggle" aria-label="Toggle Jocko mode" title="Jocko mode — discipline equals freedom" aria-pressed="false">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+      </button>
       <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
         <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
@@ -852,6 +939,8 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
       </button>
     </div>
   </header>
+
+  <div class="jocko-banner" id="jocko-banner" aria-live="polite"></div>
 
   <!-- Spotlight: per-zone "one thing that matters today" -->
   <section class="spotlight" id="spotlight" aria-label="Spotlight task">
@@ -930,6 +1019,49 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
       document.documentElement.setAttribute('data-theme', 'dark');
       localStorage.setItem(THEME_KEY, 'dark');
     }
+  });
+
+  // ── Jocko mode ───────────────────────────────────────────────────────────────
+  // Flips the whole format and taunts you when your list is short. No mercy.
+  const JOCKO_KEY = 'jot.jocko';
+  (function initJocko() {
+    if (localStorage.getItem(JOCKO_KEY) === 'on') {
+      document.documentElement.setAttribute('data-jocko', 'on');
+    }
+  })();
+
+  function jockoTaunt(openCount) {
+    if (openCount === 0) return "an empty list is not zen, it's avoidance. get after it.";
+    if (openCount === 1) return "one task? i was up at 0430. what's your excuse?";
+    if (openCount === 2) return "two tasks. that's a warmup, not a day.";
+    if (openCount === 3) return "three. still soft. the list doesn't scare me.";
+    if (openCount <= 5) return "getting warmer. discipline equals freedom. keep stacking.";
+    return "now we're talking. no excuses. execute.";
+  }
+
+  function updateJockoBanner() {
+    const banner = document.getElementById('jocko-banner');
+    if (!banner) return;
+    const open = (state.items[state.zone] || []).filter(i => !i.done).length;
+    banner.textContent = jockoTaunt(open);
+  }
+
+  const jockoToggle = document.getElementById('jocko-toggle');
+  jockoToggle.setAttribute(
+    'aria-pressed',
+    String(document.documentElement.getAttribute('data-jocko') === 'on')
+  );
+  jockoToggle.addEventListener('click', () => {
+    const on = document.documentElement.getAttribute('data-jocko') === 'on';
+    if (on) {
+      document.documentElement.removeAttribute('data-jocko');
+      localStorage.setItem(JOCKO_KEY, 'off');
+    } else {
+      document.documentElement.setAttribute('data-jocko', 'on');
+      localStorage.setItem(JOCKO_KEY, 'on');
+    }
+    jockoToggle.setAttribute('aria-pressed', String(!on));
+    updateJockoBanner();
   });
 
   // ── State ──────────────────────────────────────────────────────────────────
@@ -1225,6 +1357,7 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
 
   // ── List render ────────────────────────────────────────────────────────────
   function render() {
+    updateJockoBanner();
     const items = state.items[state.zone];
     if (!items || items.length === 0) {
       listEl.innerHTML = '<div class="empty">a fresh page. start typing above ↑</div>';
