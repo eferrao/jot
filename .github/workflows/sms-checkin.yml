@@ -1,0 +1,38 @@
+name: Daily priority SMS check-in
+
+# Runs every hour. The script decides whether the current Eastern-time hour
+# is a "morning" (7am) or "check-in" (10am/1pm/4pm/7pm/10pm) slot, and is a
+# no-op otherwise. Scheduling hourly + gating in-script keeps it correct
+# across EST/EDT (GitHub cron is UTC and has no DST awareness).
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Force a mode for a manual test"
+        required: false
+        type: choice
+        options: ["", "morning", "checkin"]
+        default: ""
+
+jobs:
+  checkin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Send check-in
+        env:
+          TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+          TWILIO_FROM_NUMBER: ${{ secrets.TWILIO_FROM_NUMBER }}
+          MY_PHONE_NUMBER: ${{ secrets.MY_PHONE_NUMBER }}
+        run: |
+          if [ -n "${{ github.event.inputs.force }}" ]; then
+            python3 automation/sms_checkin.py --force "${{ github.event.inputs.force }}"
+          else
+            python3 automation/sms_checkin.py
+          fi
