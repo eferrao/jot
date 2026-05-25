@@ -1,0 +1,49 @@
+name: Daily priority email check-in
+
+# Runs hourly. The script reads inbox replies every run, and only sends a
+# prompt (7am ET) or check-in (10am/1pm/4pm/7pm/10pm ET) in the right slot.
+# Hourly + in-script Eastern gating keeps timing correct across EST/EDT,
+# since GitHub cron is UTC with no daylight-saving awareness.
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Force a mode for a manual test"
+        required: false
+        type: choice
+        options: ["", "morning", "checkin"]
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  checkin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run check-in
+        env:
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          CONVERSATION_EMAILS: ${{ secrets.CONVERSATION_EMAILS }}
+        run: |
+          if [ -n "${{ github.event.inputs.force }}" ]; then
+            python3 automation/email_checkin.py --force "${{ github.event.inputs.force }}"
+          else
+            python3 automation/email_checkin.py
+          fi
+      - name: Persist state
+        run: |
+          if [ -n "$(git status --porcelain automation/data/state.json)" ]; then
+            git config user.name "jot-bot"
+            git config user.email "jot-bot@users.noreply.github.com"
+            git add automation/data/state.json
+            git commit -m "Update check-in state [skip ci]"
+            git push
+          fi
