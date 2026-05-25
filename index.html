@@ -244,6 +244,15 @@
     text-decoration: line-through;
     text-decoration-thickness: 1px;
   }
+  .spotlight-meta { margin-top: 8px; }
+  .spotlight-img-wrap { margin-bottom: 4px; }
+  .spotlight-notes-preview {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    white-space: pre-wrap;
+  }
+  .spotlight.is-done .spotlight-notes-preview { opacity: 0.6; }
   /* Subtle flourish when spotlight is completed */
   @keyframes spotlightDone {
     0% { transform: scale(1); }
@@ -335,6 +344,32 @@
     box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 0 0 1px var(--line);
     display: block;
   }
+  .thumb-wrap {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-end;
+    margin-top: 10px;
+  }
+  .thumb-wrap .thumb {
+    margin-top: 4px;
+    display: block;
+  }
+  .thumb-remove {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 0;
+    background: rgba(0,0,0,0.55);
+    color: #fff;
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  .thumb-remove:hover { background: rgba(0,0,0,0.8); }
 
   .item .meta-preview {
     font-size: 13px;
@@ -663,6 +698,12 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
       ></textarea>
       <button class="spotlight-remove" id="spotlight-remove" hidden>clear</button>
     </div>
+    <div class="spotlight-meta" id="spotlight-meta" hidden>
+      <div class="spotlight-img-wrap" id="spotlight-img-wrap" hidden>
+        <img id="spotlight-img" class="thumb" alt="attached sketch" />
+      </div>
+      <div class="spotlight-notes-preview" id="spotlight-notes"></div>
+    </div>
   </section>
 
   <div class="capture">
@@ -848,6 +889,17 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
     autoResizeSpotlight();
     spotlightRemove.hidden = isEmpty;
     spotlightBack.hidden = isEmpty;
+    const metaEl   = document.getElementById('spotlight-meta');
+    const imgWrap  = document.getElementById('spotlight-img-wrap');
+    const imgEl    = document.getElementById('spotlight-img');
+    const notesEl  = document.getElementById('spotlight-notes');
+    const hasNotes = !!(sl?.notes);
+    const hasImg   = !!(sl?.img);
+    metaEl.hidden  = isEmpty || (!hasNotes && !hasImg);
+    notesEl.textContent = sl?.notes || '';
+    notesEl.hidden = !hasNotes;
+    if (hasImg) { imgEl.src = sl.img; imgWrap.hidden = false; }
+    else        { imgEl.src = '';     imgWrap.hidden = true;  }
   }
 
   function autoResizeSpotlight() {
@@ -865,7 +917,9 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
       state.spotlight[z] = {
         text: trimmed,
         done: existing?.done || false,
-        ts: existing?.ts || Date.now()
+        ts: existing?.ts || Date.now(),
+        notes: existing?.notes || '',
+        img: existing?.img || null
       };
     }
     saveState();
@@ -890,7 +944,7 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
     if (!sl || !sl.text) return;
 
     // Move to done list
-    state.items[z].push({ id: Date.now(), text: sl.text, notes: '', img: null, done: true, ts: Date.now() });
+    state.items[z].push({ id: Date.now(), text: sl.text, notes: sl.notes || '', img: sl.img || null, done: true, ts: Date.now() });
     state.spotlight[z] = null;
     saveState();
     renderSpotlight();
@@ -915,7 +969,7 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
     const z = state.zone;
     const sl = state.spotlight[z];
     if (!sl || !sl.text) return;
-    state.items[z].push({ id: Date.now(), text: sl.text, notes: '', img: null, done: false, ts: Date.now() });
+    state.items[z].push({ id: Date.now(), text: sl.text, notes: sl.notes || '', img: sl.img || null, done: false, ts: sl.ts || Date.now() });
     state.spotlight[z] = null;
     saveState();
     renderSpotlight();
@@ -923,12 +977,13 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
     showToast('moved back to list');
   });
 
+
   function promoteToSpotlight(itemId) {
     const items = state.items[state.zone];
     const idx = items.findIndex(x => x.id === itemId);
     if (idx === -1) return;
     const it = items[idx];
-    state.spotlight[state.zone] = { text: it.text, done: false, ts: Date.now() };
+    state.spotlight[state.zone] = { text: it.text, done: false, ts: Date.now(), notes: it.notes || '', img: it.img || null };
     items.splice(idx, 1);
     saveState();
     renderSpotlight();
@@ -966,7 +1021,7 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
         <div class="check" data-action="toggle" role="checkbox" aria-checked="${it.done}"></div>
         <div class="body">
           <div class="text" data-action="expand">${escapeHtml(it.text)}</div>
-          ${it.img ? `<img src="${it.img}" class="thumb" alt="attached sketch" data-action="expand" />` : ''}
+          ${it.img ? `<div class="thumb-wrap">${it.expanded ? `<button class="thumb-remove" data-action="remove-img" aria-label="Remove image">✕</button>` : ''}<img src="${it.img}" class="thumb" alt="attached sketch" data-action="expand" /></div>` : ''}
           ${it.expanded ? `
             <textarea class="notes" placeholder="any thoughts, links, follow-ups…" data-action="notes">${escapeHtml(it.notes || '')}</textarea>
             <div class="actions">
@@ -1096,6 +1151,10 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
         r.readAsDataURL(f);
       };
       fi.click();
+    } else if (action === 'remove-img') {
+      it.img = null;
+      saveState();
+      render();
     } else if (action === 'promote') {
       promoteToSpotlight(id);
     }
