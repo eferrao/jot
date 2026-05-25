@@ -303,7 +303,7 @@
   .capture input::placeholder { color: var(--ink-faint); }
 
   /* ──────────────────── List items ──────────────────── */
-  .list { display: flex; flex-direction: column; }
+  .list { display: flex; flex-direction: column; padding-bottom: 48px; }
 
   .item {
     display: flex;
@@ -491,6 +491,24 @@
   }
   .section-label .clear-done:hover { color: var(--ink-soft); }
 
+  .done-toggle {
+    background: none;
+    border: 0;
+    cursor: pointer;
+    color: var(--ink-faint);
+    padding: 0;
+    font-size: 16px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+  }
+  .done-toggle:hover { color: var(--ink-soft); }
+  .chevron {
+    display: inline-block;
+    transition: transform 0.15s;
+  }
+  .chevron.open { transform: rotate(90deg); }
+
   /* ──────────────────── Header controls ──────────────────── */
   .theme-toggle, .icon-btn {
     background: var(--theme-btn-bg);
@@ -515,6 +533,7 @@
   .theme-toggle .icon-moon { display: block; }
   html[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
   html[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+  .icon-btn.active { background: var(--theme-btn-hover); color: var(--ink); }
 
   .header-right {
     display: flex;
@@ -573,6 +592,45 @@
     cursor: pointer; font: inherit; padding: 0;
   }
 
+  /* ──────────────────── Goals view ──────────────────── */
+  #goalsSection { display: none; padding: 0 0 120px; }
+  #goalsSection.active { display: block; }
+
+  .goal-card {
+    background: var(--paper);
+    border: 1px solid var(--border, var(--line));
+    border-left: 3px solid var(--accent);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+  }
+  .goal-card.status-onhold { border-left-color: var(--ink-faint); }
+  .goal-card.status-completed { border-left-color: var(--ink-faint); opacity: 0.6; }
+  .goal-title-input {
+    width: 100%; border: none; background: transparent;
+    font-size: 16px; font-weight: 600; color: var(--ink);
+    outline: none; padding: 0; margin-bottom: 8px; font-family: inherit;
+  }
+  .goal-desc-input {
+    width: 100%; border: none; background: transparent;
+    font-size: 13px; color: var(--ink-soft); resize: none;
+    outline: none; padding: 0; min-height: 36px;
+    font-family: inherit; line-height: 1.5;
+  }
+  .goal-status-select {
+    margin-top: 10px; font-size: 12px; color: var(--ink-soft);
+    background: transparent; border: 1px solid var(--line);
+    border-radius: 6px; padding: 3px 8px; cursor: pointer; font-family: inherit;
+  }
+  .add-goal-btn {
+    display: block; margin-bottom: 16px;
+    background: transparent; border: 1px dashed var(--line);
+    border-radius: 10px; padding: 10px; width: 100%;
+    color: var(--ink-soft); font-size: 14px; cursor: pointer;
+    text-align: center; font-family: inherit;
+  }
+  .add-goal-btn:hover { border-color: var(--accent); color: var(--ink); }
+
   @media (max-width: 540px) {
     .footer-hints { display: none; }
     .app { padding: 24px 18px 80px; }
@@ -599,6 +657,95 @@
 html[data-theme="dark"] #rabbit-overlay { background: #1c1916; }
 html[data-theme="dark"] #rabbit-overlay h2 { color: #e8e0d0; }
 html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
+
+/* ── Task pills ─────────────────────────────────────────────────────────── */
+.task-pill {
+  display: inline-block;
+  font-size: 11px;
+  border-radius: 4px;
+  padding: 2px 6px;
+  line-height: 1.4;
+}
+.task-pill.due-pill {
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+}
+.task-pill.due-pill.overdue {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.task-pill.goal-pill {
+  border: 1px solid var(--spotlight-border);
+  color: var(--spotlight-border);
+}
+.pill-row {
+  display: flex;
+  gap: 5px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+/* ── Expanded meta (due date + goal) ────────────────────────────────────── */
+.expanded-meta {
+  display: flex; gap: 16px; margin-top: 8px; flex-wrap: wrap; align-items: center;
+}
+.meta-label {
+  font-size: 12px; color: var(--ink-faint); display: flex; align-items: center; gap: 5px;
+}
+.due-input {
+  border: none; background: transparent; color: var(--ink-soft);
+  font-size: 12px; font-family: inherit; cursor: pointer; outline: none;
+}
+.goal-select {
+  border: none; background: transparent; color: var(--ink-soft);
+  font-size: 12px; font-family: inherit; cursor: pointer; outline: none;
+}
+
+/* Goal card task list */
+.goal-tasks {
+  margin-top: 12px;
+  border-top: 1px solid var(--line);
+  padding-top: 4px;
+}
+.goal-tasks .item .promote { display: none; }
+.goal-tasks .item .zone-assign { display: none; }
+
+/* Zone buttons on goal card header */
+.goal-card-header { display: flex; align-items: center; gap: 8px; }
+.goal-card-header .goal-title-input { flex: 1; }
+.goal-zone-assign { display: flex; gap: 4px; flex-shrink: 0; }
+.goal-zone-assign button {
+  font-size: 11px; background: transparent;
+  border: 1px solid var(--line); border-radius: 10px;
+  padding: 2px 8px; cursor: pointer;
+  color: var(--ink-soft); font-family: inherit; white-space: nowrap;
+}
+.goal-zone-assign button:hover { border-color: var(--accent); color: var(--accent); }
+.goal-zone-assign button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.goal-tasks-empty { font-size: 13px; color: var(--ink-faint); padding: 8px 0 4px; }
+
+/* Compact capture inside goal card */
+.goal-capture-wrap { margin-top: 6px; }
+.goal-capture {
+  width: 100%; border: none; background: transparent;
+  font-size: 13px; font-family: inherit; color: var(--ink);
+  outline: none; padding: 6px 0;
+  border-bottom: 1px dashed var(--line);
+}
+.goal-capture::placeholder { color: var(--ink-faint); }
+.goal-capture:focus { border-bottom-color: var(--ink-soft); }
+
+/* Zone-assign buttons on unzoned tasks */
+.zone-assign {
+  display: flex; gap: 4px; flex-shrink: 0; align-items: center; margin-top: 2px;
+}
+.zone-assign button {
+  font-size: 11px; background: transparent;
+  border: 1px solid var(--line); border-radius: 10px;
+  padding: 2px 8px; cursor: pointer;
+  color: var(--ink-soft); font-family: inherit; white-space: nowrap;
+}
+.zone-assign button:hover { border-color: var(--accent); color: var(--accent); }
 
 </style>
 </head>
@@ -663,9 +810,10 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
       <span class="date-stamp" id="date-stamp"></span>
     </div>
     <div class="header-right">
-      <div class="zone-switch" role="tablist">
+      <div class="zone-switch" id="zoneSwitcher" role="tablist">
         <button class="active" data-zone="work">work <span class="hint">⌘1</span></button>
         <button data-zone="personal">personal <span class="hint">⌘2</span></button>
+        <button id="goalsBtn" title="Goals (⌘3)" aria-label="Goals">goals <span class="hint">⌘3</span></button>
       </div>
       <button class="icon-btn" id="export-btn" aria-label="Export to JSON" title="Export to JSON">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -723,6 +871,22 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
   </div>
 
   <div class="list" id="list"></div>
+
+  <div id="goalsSection">
+    <button class="add-goal-btn" id="addGoalBtn">+ new goal</button>
+    <div id="goalsList"></div>
+    <div id="goalsDoneSection" style="display:none">
+      <div class="section-label">
+        <button class="done-toggle" id="goalsDoneToggle" aria-expanded="false">
+          <span class="chevron">›</span>
+        </button>
+        <span>done</span>
+        <span class="count" id="goalsDoneCount">0</span>
+        <button class="clear-done" id="clearDoneGoals">clear all done</button>
+      </div>
+      <div id="goalsDoneList"></div>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -730,6 +894,7 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
 <div class="footer-hints">
   <span><kbd>⌘1</kbd> work</span>
   <span><kbd>⌘2</kbd> personal</span>
+  <span><kbd>⌘3</kbd> goals</span>
   <span><kbd>/</kbd> capture</span>
   <span><kbd>↑</kbd> promote</span>
 </div>
@@ -782,26 +947,42 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
     },
     items: {
       work: [
-        { id: 1, text: 'V3 of the pitch deck — add the customer-quote slide', notes: 'maybe move the timeline before pricing', img: null, done: false, ts: Date.now() - 25 * 60000 },
-        { id: 2, text: 'dashboard layout — try the 3-column variant', notes: '', img: sampleSketch, done: false, ts: Date.now() - 2 * 3600000 },
-        { id: 3, text: 'follow up w/ Maya re: contract', notes: '', img: null, done: false, ts: Date.now() - 4 * 3600000 },
-        { id: 4, text: 'update brand colors in figma', notes: '', img: null, done: true, ts: Date.now() - 26 * 3600000 },
+        { id: 1, text: 'V3 of the pitch deck — add the customer-quote slide', notes: 'maybe move the timeline before pricing', img: null, done: false, ts: Date.now() - 25 * 60000, dueDate: null, zone: 'work', goalId: null },
+        { id: 2, text: 'dashboard layout — try the 3-column variant', notes: '', img: sampleSketch, done: false, ts: Date.now() - 2 * 3600000, dueDate: null, zone: 'work', goalId: null },
+        { id: 3, text: 'follow up w/ Maya re: contract', notes: '', img: null, done: false, ts: Date.now() - 4 * 3600000, dueDate: null, zone: 'work', goalId: null },
+        { id: 4, text: 'update brand colors in figma', notes: '', img: null, done: true, ts: Date.now() - 26 * 3600000, dueDate: null, zone: 'work', goalId: null },
       ],
       personal: [
-        { id: 5, text: 'call mom — sunday', notes: '', img: null, done: false, ts: Date.now() - 30 * 60000 },
-        { id: 6, text: 'ask sara about her dentist', notes: '', img: null, done: false, ts: Date.now() - 3 * 3600000 },
-        { id: 7, text: 'renew library books', notes: '', img: null, done: true, ts: Date.now() - 48 * 3600000 },
+        { id: 5, text: 'call mom — sunday', notes: '', img: null, done: false, ts: Date.now() - 30 * 60000, dueDate: null, zone: 'personal', goalId: null },
+        { id: 6, text: 'ask sara about her dentist', notes: '', img: null, done: false, ts: Date.now() - 3 * 3600000, dueDate: null, zone: 'personal', goalId: null },
+        { id: 7, text: 'renew library books', notes: '', img: null, done: true, ts: Date.now() - 48 * 3600000, dueDate: null, zone: 'personal', goalId: null },
       ]
     }
   };
 
   function normalize(parsed) {
     // Defensive: fill in any missing pieces so old data keeps working.
-    const out = { zone: parsed.zone || 'work', spotlight: parsed.spotlight || {}, items: parsed.items || {} };
+    const out = { zone: parsed.zone || 'work', spotlight: parsed.spotlight || {}, items: parsed.items || {}, goals: parsed.goals || [], currentView: null };
     if (!out.items.work) out.items.work = [];
     if (!out.items.personal) out.items.personal = [];
     if (!('work' in out.spotlight)) out.spotlight.work = null;
     if (!('personal' in out.spotlight)) out.spotlight.personal = null;
+    ['work','personal'].forEach(z => {
+      (out.items[z] || []).forEach(it => {
+        if (it.dueDate === undefined) it.dueDate = null;
+        if (it.zone === undefined) it.zone = z;
+        if (it.goalId === undefined) it.goalId = null;
+      });
+    });
+    (out.goals || []).forEach(g => {
+      if (g.zone === undefined) g.zone = null;
+    });
+    if (!out.items.unzoned) out.items.unzoned = [];
+    (out.items.unzoned || []).forEach(it => {
+      if (it.dueDate === undefined) it.dueDate = null;
+      if (it.zone === undefined) it.zone = null;
+      if (it.goalId === undefined) it.goalId = null;
+    });
     return out;
   }
 
@@ -833,14 +1014,16 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
 
   function saveState() {
     try {
-      const toSave = { zone: state.zone, spotlight: state.spotlight, items: state.items };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+      const { zone, spotlight, items, goals } = state;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ zone, spotlight, items, goals }));
     } catch (e) {
       console.warn('save failed', e);
     }
   }
 
   let state = loadState();
+  const doneCollapsed = { work: true, personal: true };
+  let goalsDoneCollapsed = true;
 
   // ── DOM refs ───────────────────────────────────────────────────────────────
   const listEl = document.getElementById('list');
@@ -869,6 +1052,14 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
     return Math.floor(hrs / 24) + 'd ago';
   }
 
+  function findTask(id) {
+    for (const z of ['work', 'personal', 'unzoned']) {
+      const it = (state.items[z] || []).find(x => x.id === id);
+      if (it) return { item: it, zone: z };
+    }
+    return null;
+  }
+
   function fmtDateStamp() {
     const d = new Date();
     const days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
@@ -888,7 +1079,7 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
   }
 
   // sync active zone button with state.zone on load
-  document.querySelectorAll('.zone-switch button').forEach(b =>
+  document.querySelectorAll('.zone-switch button[data-zone]').forEach(b =>
     b.classList.toggle('active', b.dataset.zone === state.zone));
 
   // ── Spotlight render ───────────────────────────────────────────────────────
@@ -959,7 +1150,7 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
     if (!sl || !sl.text) return;
 
     // Move to done list
-    state.items[z].push({ id: Date.now(), text: sl.text, notes: sl.notes || '', img: sl.img || null, done: true, ts: Date.now() });
+    state.items[z].push({ id: Date.now(), text: sl.text, notes: sl.notes || '', img: sl.img || null, done: true, ts: Date.now(), dueDate: null, zone: z, goalId: null });
     state.spotlight[z] = null;
     saveState();
     renderSpotlight();
@@ -984,7 +1175,7 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
     const z = state.zone;
     const sl = state.spotlight[z];
     if (!sl || !sl.text) return;
-    state.items[z].push({ id: Date.now(), text: sl.text, notes: sl.notes || '', img: sl.img || null, done: false, ts: sl.ts || Date.now() });
+    state.items[z].push({ id: Date.now(), text: sl.text, notes: sl.notes || '', img: sl.img || null, done: false, ts: sl.ts || Date.now(), dueDate: null, zone: z, goalId: null });
     state.spotlight[z] = null;
     saveState();
     renderSpotlight();
@@ -1032,26 +1223,68 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
     let html = '';
     if (open.length) html += open.map(renderItem).join('');
     if (done.length) {
+      const collapsed = doneCollapsed[state.zone];
       html += `
         <div class="section-label">
+          <button class="done-toggle" data-action="toggle-done-collapse" aria-expanded="${!collapsed}">
+            <span class="chevron ${collapsed ? '' : 'open'}">›</span>
+          </button>
           <span>done</span>
           <span class="count">${done.length}</span>
           <button class="clear-done" data-action="clear-done">clear all done</button>
         </div>`;
-      html += done.map(renderItem).join('');
+      if (!collapsed) {
+        html += done.map(renderItem).join('');
+      }
     }
     listEl.innerHTML = html;
   }
 
-  function renderItem(it) {
+  function renderPills(it, opts = {}) {
+    let html = '';
+    if (it.dueDate) {
+      const d = new Date(it.dueDate);
+      const overdue = d < new Date() && !it.done;
+      const label = 'due ' + d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+      html += `<span class="task-pill due-pill${overdue ? ' overdue' : ''}">${label}</span>`;
+    }
+    if (it.goalId && !opts.hideGoalPill) {
+      const g = (state.goals || []).find(x => x.id === it.goalId);
+      if (g) {
+        const title = g.title.length > 12 ? g.title.slice(0,12) + '…' : g.title;
+        html += `<span class="task-pill goal-pill">${escapeHtml(title)}</span>`;
+      }
+    }
+    return html ? `<div class="pill-row">${html}</div>` : '';
+  }
+
+  function renderItem(it, opts = {}) {
+    const pillRow = renderPills(it, opts);
+    const goalsOptions = (state.goals || [])
+      .filter(g => g.status !== 'completed' || g.id === it.goalId)
+      .map(g => `<option value="${g.id}"${g.id === it.goalId ? ' selected' : ''}>${escapeHtml(g.title||'untitled')}</option>`)
+      .join('');
     return `
       <div class="item ${it.done ? 'done' : ''} ${it.expanded ? 'expanded' : ''}" data-id="${it.id}">
         <div class="check" data-action="toggle" role="checkbox" aria-checked="${it.done}"></div>
         <div class="body">
           <div class="text" data-action="expand">${escapeHtml(it.text)}</div>
+          ${pillRow}
           ${it.img ? `<div class="thumb-wrap">${it.expanded ? `<button class="thumb-remove" data-action="remove-img" aria-label="Remove image">✕</button>` : ''}<img src="${it.img}" class="thumb" alt="attached sketch" data-action="expand" /></div>` : ''}
           ${it.expanded ? `
             <textarea class="notes" placeholder="any thoughts, links, follow-ups…" data-action="notes">${escapeHtml(it.notes || '')}</textarea>
+            <div class="expanded-meta">
+              <label class="meta-label">due
+                <input type="date" class="due-input" data-action="due-date" value="${it.dueDate || ''}">
+              </label>
+              <label class="meta-label">goal
+                <select class="goal-select" data-action="goal-select">
+                  <option value="">no goal</option>
+                  ${goalsOptions}
+                  <option value="__new__">＋ new goal</option>
+                </select>
+              </label>
+            </div>
             <div class="actions">
               <button data-action="attach">+ image</button>
               <button data-action="delete">delete</button>
@@ -1059,7 +1292,13 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
             </div>
           ` : (it.notes ? `<div class="meta-preview" data-action="expand">${escapeHtml(it.notes.slice(0,80))}${it.notes.length > 80 ? '…' : ''}</div>` : '')}
         </div>
-        ${it.done ? '' : `<button class="promote" data-action="promote" aria-label="Set as spotlight" title="Set as spotlight">↑</button>`}
+        ${it.zone === null
+          ? `<div class="zone-assign">
+               <button data-action="assign-zone" data-zone="work">work</button>
+               <button data-action="assign-zone" data-zone="personal">personal</button>
+             </div>`
+          : (it.done ? '' : `<button class="promote" data-action="promote" aria-label="Set as spotlight" title="Set as spotlight">↑</button>`)
+        }
       </div>
     `;
   }
@@ -1069,7 +1308,8 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
     if (e.key === 'Enter' && captureEl.value.trim()) {
       state.items[state.zone].unshift({
         id: Date.now(), text: captureEl.value.trim(),
-        notes: '', img: null, done: false, ts: Date.now()
+        notes: '', img: null, done: false, ts: Date.now(),
+        dueDate: null, zone: state.zone, goalId: null
       });
       captureEl.value = '';
       saveState();
@@ -1086,7 +1326,8 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
         r.onload = () => {
           state.items[state.zone].unshift({
             id: Date.now(), text: captureEl.value.trim() || 'sketch',
-            notes: '', img: r.result, done: false, ts: Date.now()
+            notes: '', img: r.result, done: false, ts: Date.now(),
+            dueDate: null, zone: state.zone, goalId: null
           });
           captureEl.value = '';
           saveState();
@@ -1104,8 +1345,9 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
     btn.addEventListener('click', () => switchZone(btn.dataset.zone));
   });
   function switchZone(z) {
+    if (state.currentView === 'goals') switchFromGoals();
     state.zone = z;
-    document.querySelectorAll('.zone-switch button').forEach(b =>
+    document.querySelectorAll('.zone-switch button[data-zone]').forEach(b =>
       b.classList.toggle('active', b.dataset.zone === z));
     saveState();
     renderSpotlight();
@@ -1116,8 +1358,9 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
   // ── Keyboard shortcuts ─────────────────────────────────────────────────────
   document.addEventListener('keydown', e => {
     const mod = e.metaKey || e.ctrlKey;
-    if (mod && e.key === '1') { e.preventDefault(); switchZone('work'); }
-    else if (mod && e.key === '2') { e.preventDefault(); switchZone('personal'); }
+    if (mod && e.key === '1') { e.preventDefault(); if (state.currentView === 'goals') switchFromGoals(); switchZone('work'); }
+    else if (mod && e.key === '2') { e.preventDefault(); if (state.currentView === 'goals') switchFromGoals(); switchZone('personal'); }
+    else if (mod && e.key === '3') { e.preventDefault(); switchToGoals(); }
     else if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
       e.preventDefault(); captureEl.focus();
     }
@@ -1125,10 +1368,13 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
 
   // ── List interactions ──────────────────────────────────────────────────────
   listEl.addEventListener('click', e => {
-    const action = e.target.dataset.action;
+    const action = e.target.closest('[data-action]')?.dataset.action;
 
     // Section-level actions (not tied to an item)
-    if (action === 'clear-done') {
+    if (action === 'toggle-done-collapse') {
+      doneCollapsed[state.zone] = !doneCollapsed[state.zone];
+      render();
+    } else if (action === 'clear-done') {
       const items = state.items[state.zone];
       const removed = items.filter(i => i.done);
       state.items[state.zone] = items.filter(i => !i.done);
@@ -1196,6 +1442,36 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
     }
   });
 
+  listEl.addEventListener('change', e => {
+    const action = e.target.dataset.action;
+    if (action !== 'due-date' && action !== 'goal-select') return;
+    const itemEl = e.target.closest('.item');
+    if (!itemEl) return;
+    const id = +itemEl.dataset.id;
+    const it = state.items[state.zone].find(x => x.id === id);
+    if (!it) return;
+
+    if (action === 'due-date') {
+      it.dueDate = e.target.value || null;
+      saveState();
+      render();
+    } else if (action === 'goal-select') {
+      const val = e.target.value;
+      if (val === '__new__') {
+        const newTitle = prompt('Goal name:');
+        if (newTitle && newTitle.trim()) {
+          const newGoal = { id: Date.now(), title: newTitle.trim(), description: '', status: 'active', ts: Date.now() };
+          state.goals.push(newGoal);
+          it.goalId = newGoal.id;
+        }
+      } else {
+        it.goalId = val ? +val : null;
+      }
+      saveState();
+      render();
+    }
+  });
+
   // ── Export to JSON ─────────────────────────────────────────────────────────
   exportBtn.addEventListener('click', () => {
     const payload = JSON.stringify({
@@ -1214,6 +1490,316 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     showToast('exported');
+  });
+
+  // ── Goals view ─────────────────────────────────────────────────────────────
+  const goalsSectionEl = document.getElementById('goalsSection');
+  const goalsListEl = document.getElementById('goalsList');
+  const goalsDoneSectionEl = document.getElementById('goalsDoneSection');
+  const goalsDoneListEl = document.getElementById('goalsDoneList');
+  const goalsDoneCountEl = document.getElementById('goalsDoneCount');
+  const addGoalBtn = document.getElementById('addGoalBtn');
+  const clearDoneGoalsBtn = document.getElementById('clearDoneGoals');
+  const goalsBtnEl = document.getElementById('goalsBtn');
+
+  function switchToGoals() {
+    state.currentView = 'goals';
+    goalsSectionEl.classList.add('active');
+    spotlightEl.style.display = 'none';
+    document.querySelector('.capture').style.display = 'none';
+    document.getElementById('list').style.display = 'none';
+    document.querySelectorAll('.zone-switch button[data-zone]').forEach(b => b.classList.remove('active'));
+    goalsBtnEl.classList.add('active');
+    renderGoals();
+  }
+
+  function switchFromGoals() {
+    state.currentView = null;
+    goalsSectionEl.classList.remove('active');
+    spotlightEl.style.display = '';
+    document.querySelector('.capture').style.display = '';
+    document.getElementById('list').style.display = '';
+    goalsBtnEl.classList.remove('active');
+    document.querySelectorAll('.zone-switch button[data-zone]').forEach(b =>
+      b.classList.toggle('active', b.dataset.zone === state.zone));
+  }
+
+  function renderGoals() {
+    const active = state.goals.filter(g => g.status === 'active');
+    const onhold = state.goals.filter(g => g.status === 'onhold');
+    const completed = state.goals.filter(g => g.status === 'completed');
+
+    const activeOnhold = [...active, ...onhold];
+    goalsListEl.innerHTML = '';
+    if (activeOnhold.length === 0) {
+      goalsListEl.innerHTML = '<div class="empty">no goals yet — add one above ↑</div>';
+    } else {
+      activeOnhold.forEach(g => goalsListEl.appendChild(renderGoalCard(g)));
+    }
+
+    if (completed.length > 0) {
+      goalsDoneSectionEl.style.display = '';
+      goalsDoneCountEl.textContent = completed.length;
+      const chevronEl = goalsDoneSectionEl.querySelector('.chevron');
+      if (chevronEl) chevronEl.className = `chevron ${goalsDoneCollapsed ? '' : 'open'}`;
+      const toggleBtn = goalsDoneSectionEl.querySelector('.done-toggle');
+      if (toggleBtn) toggleBtn.setAttribute('aria-expanded', !goalsDoneCollapsed);
+      goalsDoneListEl.style.display = goalsDoneCollapsed ? 'none' : '';
+      goalsDoneListEl.innerHTML = '';
+      completed.forEach(g => goalsDoneListEl.appendChild(renderGoalCard(g)));
+    } else {
+      goalsDoneSectionEl.style.display = 'none';
+      goalsDoneCollapsed = true;
+    }
+  }
+
+  function renderGoalCard(goal) {
+    const div = document.createElement('div');
+    div.className = `goal-card status-${goal.status}`;
+    div.dataset.goalId = goal.id;
+
+    const titleInput = document.createElement('input');
+    titleInput.type = 'text';
+    titleInput.className = 'goal-title-input';
+    titleInput.placeholder = 'goal title…';
+    titleInput.value = goal.title || '';
+    titleInput.addEventListener('input', () => {
+      const g = state.goals.find(x => x.id === goal.id);
+      if (g) { g.title = titleInput.value; saveState(); }
+    });
+
+    const descInput = document.createElement('textarea');
+    descInput.className = 'goal-desc-input';
+    descInput.placeholder = 'describe this goal…';
+    descInput.value = goal.description || '';
+    descInput.addEventListener('input', () => {
+      const g = state.goals.find(x => x.id === goal.id);
+      if (g) { g.description = descInput.value; saveState(); }
+      descInput.style.height = 'auto';
+      descInput.style.height = descInput.scrollHeight + 'px';
+    });
+
+    const statusSelect = document.createElement('select');
+    statusSelect.className = 'goal-status-select';
+    [['active','Active'],['onhold','On Hold'],['completed','Completed']].forEach(([val, label]) => {
+      const opt = document.createElement('option');
+      opt.value = val; opt.textContent = label;
+      if (goal.status === val) opt.selected = true;
+      statusSelect.appendChild(opt);
+    });
+    statusSelect.addEventListener('change', () => {
+      const g = state.goals.find(x => x.id === goal.id);
+      if (g) { g.status = statusSelect.value; saveState(); renderGoals(); }
+    });
+
+    const header = document.createElement('div');
+    header.className = 'goal-card-header';
+    header.appendChild(titleInput);
+
+    const zoneAssign = document.createElement('div');
+    zoneAssign.className = 'goal-zone-assign';
+    ['work', 'personal'].forEach(z => {
+      const btn = document.createElement('button');
+      btn.textContent = z;
+      btn.dataset.zone = z;
+      if (goal.zone === z) btn.classList.add('active');
+      btn.addEventListener('click', () => {
+        const g = state.goals.find(x => x.id === goal.id);
+        if (!g) return;
+        const oldZone = g.zone;
+        const newZone = z;
+        if (oldZone === newZone) return;
+        g.zone = newZone;
+        ['work', 'personal', 'unzoned'].forEach(src => {
+          if (!state.items[src]) return;
+          state.items[src].forEach(t => {
+            if (t.goalId === g.id) t.zone = newZone;
+          });
+          const toMove = state.items[src].filter(t => t.goalId === g.id);
+          if (src !== newZone && toMove.length) {
+            state.items[src] = state.items[src].filter(t => t.goalId !== g.id);
+            if (!state.items[newZone]) state.items[newZone] = [];
+            state.items[newZone].push(...toMove);
+          }
+        });
+        saveState();
+        renderGoals();
+        render();
+      });
+      zoneAssign.appendChild(btn);
+    });
+    header.appendChild(zoneAssign);
+    div.appendChild(header);
+    div.appendChild(descInput);
+    div.appendChild(statusSelect);
+
+    // --- task list ---
+    const goalTasks = document.createElement('div');
+    goalTasks.className = 'goal-tasks';
+
+    const allTasks = [
+      ...state.items.work, ...state.items.personal, ...(state.items.unzoned || [])
+    ].filter(t => t.goalId === goal.id);
+
+    const open = allTasks.filter(t => !t.done).sort((a,b) => b.ts - a.ts);
+    const done = allTasks.filter(t => t.done).sort((a,b) => b.ts - a.ts);
+
+    let tasksHtml = open.map(t => renderItem(t, { hideGoalPill: true })).join('');
+    if (done.length) {
+      tasksHtml += `
+        <div class="section-label">
+          <span>done</span><span class="count">${done.length}</span>
+        </div>`;
+      tasksHtml += done.map(t => renderItem(t, { hideGoalPill: true })).join('');
+    }
+    if (!allTasks.length) {
+      tasksHtml = '<div class="goal-tasks-empty">no tasks yet</div>';
+    }
+    goalTasks.innerHTML = tasksHtml;
+    div.appendChild(goalTasks);
+
+    // --- capture ---
+    const captureWrap = document.createElement('div');
+    captureWrap.className = 'goal-capture-wrap';
+    const captureInput = document.createElement('input');
+    captureInput.type = 'text';
+    captureInput.className = 'goal-capture';
+    captureInput.placeholder = 'add a task to this goal…';
+    captureInput.dataset.goalId = goal.id;
+    captureWrap.appendChild(captureInput);
+    div.appendChild(captureWrap);
+
+    return div;
+  }
+
+  addGoalBtn.addEventListener('click', () => {
+    const goal = { id: Date.now(), title: '', description: '', status: 'active', zone: null, ts: Date.now() };
+    state.goals.unshift(goal);
+    saveState();
+    renderGoals();
+    document.querySelector('.goal-title-input')?.focus();
+  });
+
+  document.getElementById('goalsDoneToggle').addEventListener('click', () => {
+    goalsDoneCollapsed = !goalsDoneCollapsed;
+    renderGoals();
+  });
+
+  clearDoneGoalsBtn.addEventListener('click', () => {
+    state.goals = state.goals.filter(g => g.status !== 'completed');
+    saveState();
+    renderGoals();
+  });
+
+  goalsListEl.addEventListener('click', e => {
+    const action = e.target.dataset.action;
+    const itemEl = e.target.closest('.item');
+    if (!itemEl) return;
+    const id = +itemEl.dataset.id;
+    const found = findTask(id);
+    if (!found) return;
+    const { item: it, zone: z } = found;
+
+    if (action === 'toggle') {
+      it.done = !it.done; it.expanded = false; it.ts = Date.now();
+      saveState(); render(); renderGoals();
+    } else if (action === 'expand') {
+      const goalCard = itemEl.closest('.goal-card');
+      const goalId = goalCard ? +goalCard.dataset.goalId : null;
+      [...state.items.work, ...state.items.personal, ...(state.items.unzoned||[])]
+        .filter(t => t.goalId === goalId && t.id !== id)
+        .forEach(t => t.expanded = false);
+      it.expanded = !it.expanded;
+      renderGoals();
+    } else if (action === 'delete') {
+      const arr = state.items[z];
+      const idx = arr.indexOf(it);
+      arr.splice(idx, 1);
+      saveState(); render(); renderGoals();
+    } else if (action === 'attach') {
+      const fi = document.createElement('input');
+      fi.type = 'file'; fi.accept = 'image/*';
+      fi.onchange = () => {
+        const f = fi.files[0]; if (!f) return;
+        const r = new FileReader();
+        r.onload = () => { it.img = r.result; saveState(); renderGoals(); };
+        r.readAsDataURL(f);
+      };
+      fi.click();
+    } else if (action === 'remove-img') {
+      it.img = null; saveState(); renderGoals();
+    } else if (action === 'assign-zone') {
+      const newZone = e.target.dataset.zone;
+      const arr = state.items[z];
+      arr.splice(arr.indexOf(it), 1);
+      it.zone = newZone;
+      state.items[newZone].unshift(it);
+      saveState(); render(); renderGoals();
+    }
+  });
+
+  goalsListEl.addEventListener('input', e => {
+    if (e.target.classList.contains('notes')) {
+      const id = +e.target.closest('.item').dataset.id;
+      const found = findTask(id);
+      if (found) { found.item.notes = e.target.value; saveState(); }
+    }
+  });
+
+  goalsListEl.addEventListener('change', e => {
+    const action = e.target.dataset.action;
+    if (action !== 'due-date' && action !== 'goal-select') return;
+    const id = +e.target.closest('.item').dataset.id;
+    const found = findTask(id);
+    if (!found) return;
+    const it = found.item;
+    if (action === 'due-date') {
+      it.dueDate = e.target.value || null;
+      saveState(); renderGoals();
+    } else if (action === 'goal-select') {
+      const val = e.target.value;
+      if (val === '__new__') {
+        const newTitle = prompt('Goal name:');
+        if (newTitle && newTitle.trim()) {
+          const newGoal = { id: Date.now(), title: newTitle.trim(), description: '', status: 'active', ts: Date.now() };
+          state.goals.push(newGoal);
+          it.goalId = newGoal.id;
+        }
+      } else {
+        it.goalId = val ? +val : null;
+      }
+      saveState(); renderGoals();
+    }
+  });
+
+  goalsListEl.addEventListener('keydown', e => {
+    if (!e.target.classList.contains('goal-capture')) return;
+    if (e.key !== 'Enter' || !e.target.value.trim()) return;
+    const goalId = +e.target.dataset.goalId;
+    const g = state.goals.find(x => x.id === goalId);
+    const taskZone = g?.zone || null;
+    const task = {
+      id: Date.now(), text: e.target.value.trim(),
+      notes: '', img: null, done: false, ts: Date.now(),
+      dueDate: null, goalId, zone: taskZone
+    };
+    if (taskZone) {
+      if (!state.items[taskZone]) state.items[taskZone] = [];
+      state.items[taskZone].push(task);
+    } else {
+      if (!state.items.unzoned) state.items.unzoned = [];
+      state.items.unzoned.push(task);
+    }
+    e.target.value = '';
+    saveState(); renderGoals();
+  });
+
+  goalsBtnEl.addEventListener('click', () => {
+    if (state.currentView === 'goals') {
+      switchFromGoals();
+    } else {
+      switchToGoals();
+    }
   });
 
   // ── Initial paint ──────────────────────────────────────────────────────────
