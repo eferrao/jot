@@ -90,6 +90,7 @@
   }
 
   html[data-jocko="on"] body {
+    background: #0a0a0a !important;
     font-family: "Arial Narrow", "Roboto Condensed", "Helvetica Neue Condensed", Impact, system-ui, sans-serif;
     letter-spacing: 0.3px;
   }
@@ -1712,11 +1713,12 @@ html[data-theme="dark"] #rabbit-overlay p { color: #a89e90; }
     const div = document.createElement('div');
     div.className = `goal-card status-${goal.status}`;
     const isDark = document.documentElement.dataset.theme === 'dark';
+    const isJocko = document.documentElement.getAttribute('data-jocko') === 'on';
     const colorKey = goal.color || 'sage';
     const c = GOAL_COLORS[colorKey];
-    div.style.background = isDark ? c.darkBg : c.bg;
+    div.style.background = isJocko ? '#0a0a0a' : (isDark ? c.darkBg : c.bg);
     div.style.border = 'none';
-    div.style.borderTop = `4px solid ${isDark ? c.darkBorder : c.border}`;
+    div.style.borderTop = `4px solid ${isJocko ? '#b7c25e' : (isDark ? c.darkBorder : c.border)}`;
     div.style.borderRadius = '12px';
     div.style.boxShadow = '0 2px 8px rgba(0,0,0,0.07)';
     div.dataset.goalId = goal.id;
