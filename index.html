@@ -61,6 +61,9 @@
   .app[data-zone="personal"] { --spotlight-bg: #ede8f5; --spotlight-border: #9b87c4; --spotlight-glow: 0 4px 18px rgba(155,135,196,0.18); }
   html[data-theme="dark"] .app[data-zone="work"]     { --spotlight-bg: #1a1f2a; --spotlight-border: #5a7aab; }
   html[data-theme="dark"] .app[data-zone="personal"] { --spotlight-bg: #221d2e; --spotlight-border: #7a6aab; }
+  /* Jocko Mode overrides zone colors — black + yellow, always */
+  html[data-jocko="on"] .app[data-zone="work"],
+  html[data-jocko="on"] .app[data-zone="personal"] { --spotlight-bg: #0a0a0a; --spotlight-border: #b7c25e; --spotlight-glow: 0 0 0 2px #b7c25e; }
 
   /* ──────────────────── JOCKO MODE ────────────────────
      Discipline equals freedom. Placed after the dark block so its
